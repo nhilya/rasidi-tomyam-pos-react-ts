@@ -60,7 +60,7 @@ export default function Layout({ children }: LayoutProps) {
         initial={false}
         animate={{ width: isSidebarCollapsed ? 80 : 256 }}
         transition={{ type: "spring", stiffness: 300, damping: 30 }}
-        className="hidden md:flex flex-col bg-sidebar border-r border-sidebar-border relative"
+        className="hidden md:flex flex-col bg-sidebar border-r border-sidebar-border relative min-h-screen"
       >
         <div className={cn(
           "p-6 border-b border-sidebar-border flex items-center justify-between",
@@ -92,7 +92,7 @@ export default function Layout({ children }: LayoutProps) {
           {isSidebarCollapsed ? <ChevronRight className="size-3" /> : <ChevronLeft className="size-3" />}
         </Button>
         
-        <nav className="flex-1 p-4 space-y-1">
+        <nav className="flex-1 overflow-auto p-4 space-y-1">
           {filteredNav.map((item) => (
             <Link
               key={item.name}
@@ -124,7 +124,7 @@ export default function Layout({ children }: LayoutProps) {
           ))}
         </nav>
 
-        <div className="p-4 border-t border-sidebar-border">
+        <div className="sticky bottom-0 p-4 border-t border-sidebar-border bg-sidebar">
           <div className={cn(
             "flex items-center gap-3 px-3 py-2 mb-4",
             isSidebarCollapsed && "px-0 justify-center"
