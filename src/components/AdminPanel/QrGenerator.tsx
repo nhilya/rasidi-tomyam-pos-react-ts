@@ -54,7 +54,6 @@ export default function QRGenerator() {
                   value={`${baseUrl}${table}`} 
                   size={160}
                   level="H"
-                  includeMargin={true}
                 />
               </div>
               <div className="text-center">
