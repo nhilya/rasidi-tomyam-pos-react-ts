@@ -6,15 +6,16 @@ import { Input } from '@/components/ui/input';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Search, Filter, CheckCircle2, Clock, FileText, Plus, ShoppingBag, Globe, RefreshCw } from 'lucide-react';
+import { Search, Filter, CheckCircle2, Clock, FileText, Plus, ShoppingBag, Globe, RefreshCw, ClipboardList } from 'lucide-react';
 import { toast } from 'sonner';
-import Receipt from '../Receipt';
+import Receipt from '../Finance/Receipt';
 import { Order, OrderPlatform } from '@/types';
-
 import { useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router-dom';
 
 export default function POSInterface() {
   const { t } = useTranslation();
+	const navigate = useNavigate();
   const { orders, addOrder, updateOrder, menu, user } = useStore();
   const [searchTerm, setSearchTerm] = React.useState('');
   const [selectedOrder, setSelectedOrder] = React.useState<Order | null>(null);
@@ -138,12 +139,21 @@ export default function POSInterface() {
         
         <div className="flex flex-col sm:flex-row gap-3 w-full lg:w-auto">
           {/* Action Buttons Group */}
-          <div className="flex gap-2 w-full sm:w-auto">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 w-full sm:w-auto">
+            <Button 
+              variant="default" 
+              className="h-8 w-full sm:w-auto border-border"
+              onClick={() => navigate('/take-order')}
+            >
+              <ClipboardList className="w-4 h-4 mr-2" />
+              {t('pos.takeOrder')}
+            </Button>
+						
             <Button 
               variant="outline" 
               onClick={handleSync} 
               disabled={isSyncing}
-              className="flex-1 sm:flex-none border-border h-8 min-w-[10rem]"
+              className="h-8 w-full sm:w-auto border-border"
             >
               <RefreshCw className={`w-4 h-4 mr-2 ${isSyncing ? 'animate-spin' : ''}`} />
               {isSyncing ? t('pos.syncing') : t('pos.sync')}
@@ -152,7 +162,7 @@ export default function POSInterface() {
             <Dialog open={isManualOrderOpen} onOpenChange={setIsManualOrderOpen}>
               <DialogTrigger
                 render={
-                  <Button variant="default" className="flex-1 sm:flex-none h-8 min-w-[10rem]">
+                  <Button variant="default" className="h-8 w-full sm:w-auto">
                     <Plus className="w-4 h-4 mr-2" />
                     {t('pos.externalOrder')}
                   </Button>

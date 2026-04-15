@@ -9,9 +9,9 @@ import { Plus, Minus, User as UserIcon, ArrowLeft, CheckCircle2 } from 'lucide-r
 import { motion, AnimatePresence } from 'motion/react';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
-import Receipt from '../Receipt';
-import LanguageSwitcher from '../LanguageSwitcher';
-import ThemeToggle from '../ThemeToggle';
+import Receipt from '../Finance/Receipt';
+import LanguageSwitcher from '../Layout/LanguageSwitcher';
+import ThemeToggle from '../Layout/ThemeToggle';
 
 export default function CustomerMenu() {
   const { t } = useTranslation();

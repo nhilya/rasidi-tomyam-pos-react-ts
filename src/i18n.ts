@@ -123,7 +123,14 @@ const resources = {
         completedOrders: "From {{count}} completed orders",
         syncSuccess: "Successfully synced {{count}} orders from external platforms.",
         orderUpdated: "Order #{{id}} updated to {{status}}",
-        orderRecorded: "{{platform}} order recorded."
+        orderRecorded: "{{platform}} order recorded.",
+        takeOrder: "Take Order",
+        staffOrdering: "Staff Ordering",
+        selectTable: "Select Table",
+        orderForTable: "Order for Table {{number}}",
+        confirmOrder: "Confirm Order",
+        orderPlaced: "Order placed successfully",
+        backToPos: "Back to POS"
       },
       inventory: {
         title: "Inventory",
@@ -335,7 +342,7 @@ const resources = {
       pos: {
         title: "Pesanan & POS",
         subtitle: "Urus pesanan langsung dan perkhidmatan meja.",
-        sync: "Segerak Platform",
+        sync: "Selaraskan Platform",
         syncing: "Menyegerak...",
         externalOrder: "Pesanan Luaran",
         recordExternal: "Rekod Pesanan Platform Luaran",
@@ -364,7 +371,14 @@ const resources = {
         completedOrders: "Daripada {{count}} pesanan selesai",
         syncSuccess: "Berjaya menyegerak {{count}} pesanan daripada platform luaran.",
         orderUpdated: "Pesanan #{{id}} dikemas kini kepada {{status}}",
-        orderRecorded: "Pesanan {{platform}} direkodkan."
+        orderRecorded: "Pesanan {{platform}} direkodkan.",
+        takeOrder: "Ambil Pesanan",
+        staffOrdering: "Pesanan Kakitangan",
+        selectTable: "Pilih Meja",
+        orderForTable: "Pesanan untuk Meja {{number}}",
+        confirmOrder: "Sahkan Pesanan",
+        orderPlaced: "Pesanan berjaya dibuat",
+        backToPos: "Kembali ke POS"
       },
       inventory: {
         title: "Inventori",
@@ -605,7 +619,14 @@ const resources = {
         completedOrders: "จาก {{count}} ออเดอร์ที่เสร็จสมบูรณ์",
         syncSuccess: "ซิงค์ออเดอร์ {{count}} รายการจากแพลตฟอร์มภายนอกสำเร็จ",
         orderUpdated: "ออเดอร์ #{{id}} อัปเดตเป็น {{status}}",
-        orderRecorded: "บันทึกออเดอร์ {{platform}} แล้ว"
+        orderRecorded: "บันทึกออเดอร์ {{platform}} แล้ว",
+        takeOrder: "รับออเดอร์",
+        staffOrdering: "การสั่งซื้อโดยพนักงาน",
+        selectTable: "เลือกโต๊ะ",
+        orderForTable: "ออเดอร์สำหรับโต๊ะ {{number}}",
+        confirmOrder: "ยืนยันออเดอร์",
+        orderPlaced: "สั่งซื้อสำเร็จแล้ว",
+        backToPos: "กลับไปที่ POS"
       },
       inventory: {
         title: "คลังสินค้า",

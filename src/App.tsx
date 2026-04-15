@@ -1,7 +1,7 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { ThemeProvider } from './components/ui/theme-provider';
 import { useStore } from './store';
-import Layout from './components/Layout';
+import Layout from './components/Layout/Layout';
 import CustomerMenu from './components/Customer/CustomerMenu';
 import Login from './components/AdminPanel/Login';
 import AdminDashboard from './components/AdminPanel/AdminDashboard';
@@ -9,8 +9,9 @@ import POSInterface from './components/AdminPanel/POSInterface';
 import InventoryManagement from './components/AdminPanel/InventoryManagement';
 import ExpensesManagement from './components/AdminPanel/ExpensesManagement';
 import CustomerManagement from './components/Customer/CustomerManagement';
-import Reports from './components/Reports';
+import Reports from './components/Analytics/Reports';
 import QRGenerator from './components/AdminPanel/QrGenerator';
+import StaffOrdering from './components/AdminPanel/StaffOrdering';
 
 export default function App() {
   const { user } = useStore();
@@ -29,6 +30,7 @@ export default function App() {
             <>
               <Route path="/admin" element={<Layout><AdminDashboard /></Layout>} />
               <Route path="/pos" element={<Layout><POSInterface /></Layout>} />
+              <Route path="/take-order" element={<Layout><StaffOrdering /></Layout>} />
               <Route path="/inventory" element={<Layout><InventoryManagement /></Layout>} />
               <Route path="/expenses" element={<Layout><ExpensesManagement /></Layout>} />
               <Route path="/customers" element={<Layout><CustomerManagement /></Layout>} />

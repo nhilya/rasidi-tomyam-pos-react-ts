@@ -7,7 +7,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Badge } from '@/components/ui/badge';
 import { Search, Phone, Mail, History, ExternalLink } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import Receipt from '../Receipt';
+import Receipt from '../Finance/Receipt';
 
 import { useTranslation } from 'react-i18next';
 
@@ -38,7 +38,7 @@ export default function CustomerManagement() {
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400" />
           <Input 
             placeholder={t('customers.search')} 
-            className="pl-10"
+            className="h-8 pl-10"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
