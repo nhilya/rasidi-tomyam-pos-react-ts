@@ -1,8 +1,8 @@
-import React from 'react';
 import { useStore } from '@/store';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { cn } from '@/lib/utils';
 import { 
   TrendingUp, 
   Users, 
@@ -160,6 +160,4 @@ function StatCard({ title, value, icon: Icon, color }: any) {
   );
 }
 
-function cn(...inputs: any[]) {
-  return inputs.filter(Boolean).join(' ');
-}
+
