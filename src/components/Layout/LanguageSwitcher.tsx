@@ -33,7 +33,7 @@ export default function LanguageSwitcher() {
             onClick={() => i18n.changeLanguage(lang.code)}
             className={
               i18n.resolvedLanguage?.startsWith(lang.code)
-                ? "bg-stone-100 font-bold"
+                ? "bg-slate-100 text-foreground font-bold dark:bg-slate-800 dark:text-slate-100"
                 : ""
             }
           >

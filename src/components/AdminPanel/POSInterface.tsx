@@ -137,33 +137,33 @@ export default function POSInterface() {
           <p className="text-muted-foreground">{t('pos.subtitle')}</p>
         </div>
         
-        <div className="flex flex-col sm:flex-row gap-3 w-full lg:w-auto">
+        <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-3 w-full">
           {/* Action Buttons Group */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 w-full sm:w-auto">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 w-full flex-1 min-w-0">
             <Button 
               variant="default" 
-              className="h-8 w-full sm:w-auto border-border"
+              className="min-h-8 w-full border-border whitespace-normal sm:whitespace-nowrap break-words text-center flex items-center justify-center gap-1"
               onClick={() => navigate('/take-order')}
             >
-              <ClipboardList className="w-4 h-4 mr-2" />
+              <ClipboardList className="w-4 h-4" />
               {t('pos.takeOrder')}
             </Button>
-						
+
             <Button 
               variant="outline" 
               onClick={handleSync} 
               disabled={isSyncing}
-              className="h-8 w-full sm:w-auto border-border"
+              className="min-h-8 w-full border-border whitespace-normal sm:whitespace-nowrap break-words text-center flex items-center justify-center gap-1"
             >
-              <RefreshCw className={`w-4 h-4 mr-2 ${isSyncing ? 'animate-spin' : ''}`} />
+              <RefreshCw className={`w-4 h-4 ${isSyncing ? 'animate-spin' : ''}`} />
               {isSyncing ? t('pos.syncing') : t('pos.sync')}
             </Button>
 
             <Dialog open={isManualOrderOpen} onOpenChange={setIsManualOrderOpen}>
               <DialogTrigger
                 render={
-                  <Button variant="default" className="h-8 w-full sm:w-auto">
-                    <Plus className="w-4 h-4 mr-2" />
+                  <Button variant="default" className="min-h-8 w-full whitespace-normal sm:whitespace-nowrap break-words text-center flex items-center justify-center gap-1">
+                    <Plus className="w-4 h-4" />
                     {t('pos.externalOrder')}
                   </Button>
                 }
@@ -220,17 +220,17 @@ export default function POSInterface() {
           </div>
 
           {/* Search and Filter Group */}
-          <div className="flex gap-2 w-full sm:w-auto">
-            <div className="relative flex-1 lg:w-64">
+          <div className="flex gap-2 w-full lg:w-auto max-w-full lg:max-w-[420px] min-w-0">
+            <div className="relative flex-1 min-w-0">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400" />
               <Input 
                 placeholder={t('pos.search')} 
-                className="h-8 w-full pl-10 bg-white"
+                className="h-8 w-full pl-10 border border-border bg-white"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
             </div>
-            <Button variant="outline" size="icon" className="shrink-0 h-8 w-8 p-0">
+            <Button variant="outline" size="icon" className="shrink-0 h-8 w-8 p-0 border border-border">
               <Filter className="w-4 h-4" />
             </Button>
           </div>
