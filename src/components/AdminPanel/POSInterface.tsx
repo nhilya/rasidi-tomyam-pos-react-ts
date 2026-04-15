@@ -143,7 +143,7 @@ export default function POSInterface() {
               variant="outline" 
               onClick={handleSync} 
               disabled={isSyncing}
-              className="flex-1 sm:flex-none border-border h-8"
+              className="flex-1 sm:flex-none border-border h-8 min-w-[10rem]"
             >
               <RefreshCw className={`w-4 h-4 mr-2 ${isSyncing ? 'animate-spin' : ''}`} />
               {isSyncing ? t('pos.syncing') : t('pos.sync')}
@@ -152,7 +152,7 @@ export default function POSInterface() {
             <Dialog open={isManualOrderOpen} onOpenChange={setIsManualOrderOpen}>
               <DialogTrigger
                 render={
-                  <Button variant="default" className="flex-1 sm:flex-none h-8">
+                  <Button variant="default" className="flex-1 sm:flex-none h-8 min-w-[10rem]">
                     <Plus className="w-4 h-4 mr-2" />
                     {t('pos.externalOrder')}
                   </Button>
