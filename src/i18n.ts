@@ -5,7 +5,7 @@ import LanguageDetector from 'i18next-browser-languagedetector';
 const resources = {
   en: {
     translation: {
-      welcome: "Welcome to MomsShop",
+      welcome: "Welcome to Rasidi Tomyam",
       subtitle: "Traditional flavors, modern service.",
       categories: {
         all: "All",
@@ -59,7 +59,7 @@ const resources = {
         table: "Table {{number}}"
       },
       login: {
-        title: "Lumina POS",
+        title: "Rasidi Tomyam",
         subtitle: "Select your role to enter the system",
         orUse: "Or use credentials",
         email: "Email",
@@ -253,7 +253,7 @@ const resources = {
   },
   ms: {
     translation: {
-      welcome: "Selamat Datang ke MomsShop",
+      welcome: "Selamat Datang ke Rasidi Tomyam",
       subtitle: "Rasa tradisional, perkhidmatan moden.",
       categories: {
         all: "Semua",
@@ -307,7 +307,7 @@ const resources = {
         table: "Meja {{number}}"
       },
       login: {
-        title: "Lumina POS",
+        title: "Rasidi Tomyam",
         subtitle: "Pilih peranan anda untuk memasuki sistem",
         orUse: "Atau gunakan kelayakan",
         email: "Emel",
@@ -501,7 +501,7 @@ const resources = {
   },
   th: {
     translation: {
-      welcome: "ยินดีต้อนรับสู่ MomsShop",
+      welcome: "ยินดีต้อนรับสู่ Rasidi Tomyam",
       subtitle: "รสชาติดั้งเดิม บริการทันสมัย",
       categories: {
         all: "ทั้งหมด",
@@ -555,7 +555,7 @@ const resources = {
         table: "โต๊ะ {{number}}"
       },
       login: {
-        title: "Lumina POS",
+        title: "Rasidi Tomyam",
         subtitle: "เลือกบทบาทของคุณเพื่อเข้าสู่ระบบ",
         orUse: "หรือใช้ข้อมูลประจำตัว",
         email: "อีเมล",

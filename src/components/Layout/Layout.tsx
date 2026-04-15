@@ -40,7 +40,7 @@ export default function Layout({ children }: LayoutProps) {
     return (
       <div className="min-h-screen bg-background font-sans">
         <header className="sticky top-0 z-50 bg-background/80 backdrop-blur-md border-b border-border px-4 py-3 flex justify-between items-center">
-          <h1 className="text-xl font-serif font-bold text-foreground">MomsShop</h1>
+          <h1 className="text-xl font-serif font-bold text-foreground">Rasidi Tomyam</h1>
           <div className="flex items-center gap-2">
             <ThemeToggle />
             <LanguageSwitcher />
@@ -72,7 +72,7 @@ export default function Layout({ children }: LayoutProps) {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
             >
-              <h1 className="text-2xl font-serif font-bold text-sidebar-foreground whitespace-nowrap">Lumina POS</h1>
+              <h1 className="text-2xl font-serif font-bold text-sidebar-foreground whitespace-nowrap">Rasidi Tomyam</h1>
               <p className="text-xs text-sidebar-foreground/60 mt-1">Management System</p>
             </motion.div>
           )}
@@ -173,7 +173,7 @@ export default function Layout({ children }: LayoutProps) {
 
       {/* Mobile Header */}
       <header className="md:hidden bg-background border-b border-border px-4 py-3 flex justify-between items-center sticky top-0 z-50">
-        <h1 className="text-xl font-serif font-bold text-foreground">Lumina POS</h1>
+        <h1 className="text-xl font-serif font-bold text-foreground">Rasidi Tomyam</h1>
         <div className="flex items-center gap-2">
           <ThemeToggle />
           <LanguageSwitcher />

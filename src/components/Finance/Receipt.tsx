@@ -24,7 +24,7 @@ export default function Receipt({ order }: ReceiptProps) {
   return (
     <Card className="w-full max-w-sm mx-auto bg-card shadow-none border-border font-mono text-sm">
       <CardHeader className="text-center pb-2">
-        <CardTitle className="text-xl font-serif font-bold text-foreground">MomsShop</CardTitle>
+        <CardTitle className="text-xl font-serif font-bold text-foreground">Rasidi Tomyam</CardTitle>
         <p className="text-xs text-muted-foreground">123 Flavor Street, Food City</p>
         <p className="text-xs text-muted-foreground">Tel: +60 12-345 6789</p>
       </CardHeader>
