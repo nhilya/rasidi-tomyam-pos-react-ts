@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { LayoutDashboard, Utensils, ClipboardList, Package, BarChart3, Users, LogOut, Menu as MenuIcon, X, DollarSign, ChevronLeft, ChevronRight, QrCode } from 'lucide-react';
+import { LayoutDashboard, Utensils, ClipboardList, Package, BarChart3, Users, LogOut, Menu as MenuIcon, X, DollarSign, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useStore } from '@/store';
 import { cn } from '@/lib/utils';
@@ -28,7 +28,7 @@ export default function Layout({ children }: LayoutProps) {
     { name: t('nav.expenses'), href: '/expenses', icon: DollarSign, roles: ['super_admin', 'manager'] },
     { name: t('nav.customers'), href: '/customers', icon: Users, roles: ['super_admin', 'manager'] },
     { name: t('nav.reports'), href: '/reports', icon: BarChart3, roles: ['super_admin', 'manager'] },
-    { name: t('nav.selfOrderQrTable'), href: '/self-order-qr', icon: QrCode, roles: ['super_admin'] },
+    { name: t('nav.employees'), href: '/employees', icon: Users, roles: ['super_admin'] },
   ];
 
   const filteredNav = navigation.filter(item => !item.roles || (user && item.roles.includes(user.role)));
