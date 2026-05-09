@@ -1,6 +1,7 @@
 import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
 import LanguageDetector from 'i18next-browser-languagedetector';
+import { QrCode } from 'lucide-react';
 
 const resources = {
   en: {
@@ -54,6 +55,7 @@ const resources = {
         customers: "Customers",
         reports: "Reports",
         employees: "Employees",
+        selfOrderQrTable: "Self Order (QR Table)",
         logout: "Logout",
         loginSoon: "Login feature coming soon!",
         table: "Table {{number}}"
@@ -303,6 +305,7 @@ const resources = {
         reports: "Laporan",
         employees: "Pekerja",
         logout: "Log Keluar",
+        selfOrderQrTable: "Pesanan Sendiri (QR Meja)",
         loginSoon: "Ciri log masuk akan datang tidak lama lagi!",
         table: "Meja {{number}}"
       },
@@ -550,6 +553,7 @@ const resources = {
         customers: "ลูกค้า",
         reports: "รายงาน",
         employees: "พนักงาน",
+        selfOrderQrTable: "สั่งอาหารด้วยคิวอาร์โค้ด",
         logout: "ออกจากระบบ",
         loginSoon: "ฟีเจอร์เข้าสู่ระบบกำลังจะมาเร็วๆ นี้!",
         table: "โต๊ะ {{number}}"
