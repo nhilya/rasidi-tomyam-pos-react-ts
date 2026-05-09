@@ -35,7 +35,7 @@ export default function App() {
               <Route path="/expenses" element={<Layout><ExpensesManagement /></Layout>} />
               <Route path="/customers" element={<Layout><CustomerManagement /></Layout>} />
               <Route path="/reports" element={<Layout><Reports /></Layout>} />
-              <Route path="/employees" element={<Layout><QRGenerator /></Layout>} />
+              <Route path="/self-order-qr" element={<Layout><QRGenerator /></Layout>} />
               <Route path="/" element={<Navigate to={user.role === 'server' || user.role === 'cashier' ? '/pos' : '/admin'} replace />} />
               <Route path="*" element={<Navigate to="/" replace />} />
             </>
