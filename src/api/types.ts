@@ -17,7 +17,7 @@ export interface PaginatedResponse<T> {
 export interface ApiUser {
   id: number;
   name: string;
-  email: string;
+  email: string | null;
   phone: string | null;
   roles: string[];
   created_at: string;

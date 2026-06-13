@@ -14,6 +14,7 @@ import CustomerManagement from './components/Customer/CustomerManagement';
 import Reports from './components/Analytics/Reports';
 import QRGenerator from './components/AdminPanel/QrGenerator';
 import StaffOrdering from './components/AdminPanel/StaffOrdering';
+import StaffManagement from './components/AdminPanel/StaffManagement';
 import { getToken, clearToken } from './lib/api';
 import { getMe } from './api/auth';
 
@@ -73,6 +74,7 @@ export default function App() {
               <Route path="/customers" element={<Layout><CustomerManagement /></Layout>} />
               <Route path="/reports" element={<Layout><Reports /></Layout>} />
               <Route path="/self-order-qr" element={<Layout><QRGenerator /></Layout>} />
+              <Route path="/staff" element={<Layout><StaffManagement /></Layout>} />
               <Route path="/" element={<Navigate to={user.role === 'server' || user.role === 'cashier' ? '/pos' : '/admin'} replace />} />
               <Route path="*" element={<Navigate to="/" replace />} />
             </>

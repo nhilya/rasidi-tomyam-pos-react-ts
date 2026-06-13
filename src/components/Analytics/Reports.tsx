@@ -8,9 +8,11 @@ import { getFinancials } from '@/api/reports';
 import { getExpenses } from '@/api/expenses';
 import { getOrders } from '@/api/orders';
 import type { FinancialsReport, ApiExpense } from '@/api/types';
+import { printElement } from '@/lib/print';
 
 export default function Reports() {
   const { t } = useTranslation();
+  const reportRef = React.useRef<HTMLDivElement>(null);
   const [financials, setFinancials] = React.useState<FinancialsReport | null>(null);
   const [expenses, setExpenses] = React.useState<ApiExpense[]>([]);
   const [ordersTotal, setOrdersTotal] = React.useState(0);
@@ -50,12 +52,13 @@ export default function Reports() {
           <h2 className="text-3xl font-serif font-bold text-foreground">{t('reports.title')}</h2>
           <p className="text-muted-foreground">{t('reports.subtitle')}</p>
         </div>
-        <Button variant="outline">
+        <Button variant="outline" onClick={() => reportRef.current && printElement(reportRef.current, 'Financial Report')}>
           <Download className="w-4 h-4 mr-2" />
           {t('reports.export')}
         </Button>
       </div>
 
+      <div ref={reportRef} className="space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard title={t('reports.stats.revenue')} value={loading ? '—' : `RM ${totalRevenue.toFixed(2)}`} icon={DollarSign} />
         <StatCard title={t('reports.stats.expenses')} value={loading ? '—' : `RM ${totalExpenses.toFixed(2)}`} icon={ShoppingBag} />
@@ -135,6 +138,7 @@ export default function Reports() {
             )}
           </CardContent>
         </Card>
+      </div>
       </div>
     </div>
   );

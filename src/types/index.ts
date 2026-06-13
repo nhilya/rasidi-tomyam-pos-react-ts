@@ -1,11 +1,11 @@
-export type Role = 'super_admin' | 'manager' | 'cashier' | 'supervisor' | 'server';
+export type Role = 'super_admin' | 'boss' | 'manager' | 'cashier' | 'supervisor' | 'server';
 
 export interface User {
   id: string;
   name: string;
-  email: string;
+  email?: string | null;
   role: Role | 'customer';
-  phone?: string;
+  phone?: string | null;
 }
 
 export interface Customer {

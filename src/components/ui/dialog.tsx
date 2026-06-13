@@ -25,6 +25,11 @@ interface DialogProps {
 
 function Dialog({ open = false, onOpenChange, children }: DialogProps) {
   const [isOpen, setIsOpen] = React.useState(open);
+
+  React.useEffect(() => {
+    setIsOpen(open);
+  }, [open]);
+
   const handleOpenChange = (newOpen: boolean) => {
     setIsOpen(newOpen);
     onOpenChange?.(newOpen);

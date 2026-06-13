@@ -30,18 +30,26 @@ const Select = React.forwardRef<HTMLDivElement, SelectProps>(
       value,
       onValueChange,
       children,
-      open,
+      open: controlledOpen,
       onOpenChange,
       ...props
     },
     ref
-  ) => (
-    <SelectContext.Provider value={{ value, onValueChange, open, onOpenChange }}>
-      <div ref={ref} className={cn('relative', className)} {...props}>
-        {children}
-      </div>
-    </SelectContext.Provider>
-  )
+  ) => {
+    const [internalOpen, setInternalOpen] = React.useState(false);
+    const open = controlledOpen ?? internalOpen;
+    const handleOpenChange = (next: boolean) => {
+      setInternalOpen(next);
+      onOpenChange?.(next);
+    };
+    return (
+      <SelectContext.Provider value={{ value, onValueChange, open, onOpenChange: handleOpenChange }}>
+        <div ref={ref} className={cn('relative', className)} {...props}>
+          {children}
+        </div>
+      </SelectContext.Provider>
+    );
+  }
 );
 Select.displayName = 'Select';
 

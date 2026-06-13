@@ -54,6 +54,7 @@ const resources = {
         customers: "Customers",
         reports: "Reports",
         employees: "Employees",
+        staff: "Staff",
         selfOrderQrTable: "Self Order (QR Table)",
         logout: "Logout",
         loginSoon: "Login feature coming soon!",
@@ -64,9 +65,11 @@ const resources = {
         subtitle: "Select your role to enter the system",
         orUse: "Or use credentials",
         email: "Email",
+        phone: "Phone Number",
         password: "Password",
         signIn: "Sign In",
         roles: {
+          boss: "Boss",
           super_admin: "Super Admin",
           manager: "Manager",
           supervisor: "Supervisor",
@@ -158,7 +161,18 @@ const resources = {
           healthy: "Healthy"
         },
         restockPrompt: "Enter restock amount:",
-        restockSuccess: "Inventory updated"
+        restockSuccess: "Inventory updated",
+        newItem: "New Menu Item",
+        addSuccess: "Item added successfully",
+        form: {
+          name: "Item Name",
+          description: "Description",
+          descPlaceholder: "e.g., Spicy soup with seafood",
+          price: "Price (RM)",
+          category: "Category",
+          stock: "Initial Stock",
+          minStock: "Min. Stock Alert"
+        }
       },
       expenses: {
         title: "Expenses & Cash",
@@ -250,6 +264,39 @@ const resources = {
         addTable: "Add Table",
         save: "Save",
         print: "Print"
+      },
+      staff: {
+        title: "Staff Management",
+        subtitle: "Add, edit, and manage your staff accounts.",
+        search: "Search by name or phone...",
+        addStaff: "Add Staff",
+        editStaff: "Edit Staff",
+        name: "Full Name",
+        phone: "Phone Number",
+        password: "Password",
+        passwordHint: "leave blank to keep current",
+        role: "Role",
+        selectRole: "Select role",
+        fillRequired: "Please fill in all required fields.",
+        saveSuccess: "Staff saved successfully.",
+        deleteSuccess: "Staff deleted.",
+        confirmDelete: "Delete staff member",
+        confirmDeleteTitle: "Are you sure?",
+        confirmDeleteDesc: "This will remove \"{{name}}\" from active staff. This cannot be undone.",
+        confirmDeleteYes: "Yes, delete staff",
+        noStaff: "No staff found.",
+        activeStaff: "Active Staff",
+        pastStaff: "Past Staff",
+        noPastStaff: "No past staff records.",
+        save: "Save Changes",
+        cancel: "Cancel",
+        table: {
+          id: "ID",
+          name: "Name",
+          phone: "Phone",
+          role: "Role",
+          joined: "Joined"
+        }
       }
     }
   },
@@ -304,8 +351,9 @@ const resources = {
         customers: "Pelanggan",
         reports: "Laporan",
         employees: "Pekerja",
-        logout: "Log Keluar",
+        staff: "Kakitangan",
         selfOrderQrTable: "Pesanan Sendiri (QR Meja)",
+        logout: "Log Keluar",
         loginSoon: "Ciri log masuk akan datang tidak lama lagi!",
         table: "Meja {{number}}"
       },
@@ -314,9 +362,11 @@ const resources = {
         subtitle: "Pilih peranan anda untuk memasuki sistem",
         orUse: "Atau gunakan kelayakan",
         email: "Emel",
+        phone: "Nombor Telefon",
         password: "Kata Laluan",
         signIn: "Log Masuk",
         roles: {
+          boss: "Boss",
           super_admin: "Super Admin",
           manager: "Pengurus",
           supervisor: "Penyelia",
@@ -408,7 +458,18 @@ const resources = {
           healthy: "Sihat"
         },
         restockPrompt: "Masukkan jumlah tambah stok:",
-        restockSuccess: "Inventori dikemas kini"
+        restockSuccess: "Inventori dikemas kini",
+        newItem: "Item Menu Baru",
+        addSuccess: "Item berjaya ditambah",
+        form: {
+          name: "Nama Item",
+          description: "Penerangan",
+          descPlaceholder: "cth., Sup pedas dengan makanan laut",
+          price: "Harga (RM)",
+          category: "Kategori",
+          stock: "Stok Awal",
+          minStock: "Had Stok Minimum"
+        }
       },
       expenses: {
         title: "Perbelanjaan & Tunai",
@@ -500,6 +561,39 @@ const resources = {
         addTable: "Tambah Meja",
         save: "Simpan",
         print: "Cetak"
+      },
+      staff: {
+        title: "Pengurusan Kakitangan",
+        subtitle: "Tambah, edit, dan urus akaun kakitangan anda.",
+        search: "Cari nama atau nombor telefon...",
+        addStaff: "Tambah Kakitangan",
+        editStaff: "Edit Kakitangan",
+        name: "Nama Penuh",
+        phone: "Nombor Telefon",
+        password: "Kata Laluan",
+        passwordHint: "kosongkan untuk kekalkan semasa",
+        role: "Peranan",
+        selectRole: "Pilih peranan",
+        fillRequired: "Sila isi semua medan yang diperlukan.",
+        saveSuccess: "Kakitangan berjaya disimpan.",
+        deleteSuccess: "Kakitangan dipadam.",
+        confirmDelete: "Padam ahli kakitangan",
+        confirmDeleteTitle: "Adakah anda pasti?",
+        confirmDeleteDesc: "Ini akan memadam \"{{name}}\" daripada kakitangan aktif. Tindakan ini tidak boleh dibatalkan.",
+        confirmDeleteYes: "Ya, padam kakitangan",
+        noStaff: "Tiada kakitangan ditemui.",
+        activeStaff: "Kakitangan Aktif",
+        pastStaff: "Bekas Kakitangan",
+        noPastStaff: "Tiada rekod kakitangan lama.",
+        save: "Simpan Perubahan",
+        cancel: "Batal",
+        table: {
+          id: "ID",
+          name: "Nama",
+          phone: "Telefon",
+          role: "Peranan",
+          joined: "Tarikh Sertai"
+        }
       }
     }
   },
@@ -554,6 +648,7 @@ const resources = {
         customers: "ลูกค้า",
         reports: "รายงาน",
         employees: "พนักงาน",
+        staff: "พนักงาน",
         selfOrderQrTable: "สั่งอาหารด้วยคิวอาร์โค้ด",
         logout: "ออกจากระบบ",
         loginSoon: "ฟีเจอร์เข้าสู่ระบบกำลังจะมาเร็วๆ นี้!",
@@ -564,9 +659,11 @@ const resources = {
         subtitle: "เลือกบทบาทของคุณเพื่อเข้าสู่ระบบ",
         orUse: "หรือใช้ข้อมูลประจำตัว",
         email: "อีเมล",
+        phone: "เบอร์โทรศัพท์",
         password: "รหัสผ่าน",
         signIn: "เข้าสู่ระบบ",
         roles: {
+          boss: "Boss",
           super_admin: "ผู้ดูแลระบบสูงสุด (คุณแม่)",
           manager: "ผู้จัดการ",
           supervisor: "ซูเปอร์ไวเซอร์",
@@ -658,7 +755,18 @@ const resources = {
           healthy: "ปกติ"
         },
         restockPrompt: "ป้อนจำนวนการเติมสต็อก:",
-        restockSuccess: "อัปเดตคลังสินค้าแล้ว"
+        restockSuccess: "อัปเดตคลังสินค้าแล้ว",
+        newItem: "เมนูใหม่",
+        addSuccess: "เพิ่มรายการสำเร็จ",
+        form: {
+          name: "ชื่อรายการ",
+          description: "คำอธิบาย",
+          descPlaceholder: "เช่น ซุปต้มยำรสเผ็ดกับอาหารทะเล",
+          price: "ราคา (RM)",
+          category: "หมวดหมู่",
+          stock: "สต็อกเริ่มต้น",
+          minStock: "สต็อกขั้นต่ำ"
+        }
       },
       expenses: {
         title: "ค่าใช้จ่าย & เงินสด",
@@ -750,6 +858,39 @@ const resources = {
         addTable: "เพิ่มโต๊ะ",
         save: "บันทึก",
         print: "พิมพ์"
+      },
+      staff: {
+        title: "จัดการพนักงาน",
+        subtitle: "เพิ่ม แก้ไข และจัดการบัญชีพนักงานของคุณ",
+        search: "ค้นหาชื่อหรือเบอร์โทรศัพท์...",
+        addStaff: "เพิ่มพนักงาน",
+        editStaff: "แก้ไขพนักงาน",
+        name: "ชื่อ-นามสกุล",
+        phone: "เบอร์โทรศัพท์",
+        password: "รหัสผ่าน",
+        passwordHint: "เว้นว่างเพื่อคงรหัสผ่านเดิม",
+        role: "ตำแหน่ง",
+        selectRole: "เลือกตำแหน่ง",
+        fillRequired: "กรุณากรอกข้อมูลที่จำเป็นทั้งหมด",
+        saveSuccess: "บันทึกข้อมูลพนักงานสำเร็จ",
+        deleteSuccess: "ลบพนักงานแล้ว",
+        confirmDelete: "ลบพนักงาน",
+        confirmDeleteTitle: "คุณแน่ใจหรือไม่?",
+        confirmDeleteDesc: "การดำเนินการนี้จะลบ \"{{name}}\" ออกจากพนักงานที่ใช้งานอยู่ และไม่สามารถยกเลิกได้",
+        confirmDeleteYes: "ใช่ ลบพนักงาน",
+        noStaff: "ไม่พบพนักงาน",
+        activeStaff: "พนักงานปัจจุบัน",
+        pastStaff: "พนักงานเก่า",
+        noPastStaff: "ไม่มีข้อมูลพนักงานเก่า",
+        save: "บันทึกการเปลี่ยนแปลง",
+        cancel: "ยกเลิก",
+        table: {
+          id: "ID",
+          name: "ชื่อ",
+          phone: "เบอร์โทรศัพท์",
+          role: "ตำแหน่ง",
+          joined: "วันที่เข้าร่วม"
+        }
       }
     }
   }

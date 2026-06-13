@@ -6,11 +6,11 @@ export interface LoginResponse {
   user: ApiUser;
 }
 
-export async function login(email: string, password: string): Promise<LoginResponse> {
+export async function login(phone: string, password: string): Promise<LoginResponse> {
   const res = await apiFetch<LoginResponse>('/auth/login', {
     method: 'POST',
     auth: false,
-    body: JSON.stringify({ email, password }),
+    body: JSON.stringify({ phone, password }),
   });
   setToken(res.token);
   return res;
