@@ -1,6 +1,8 @@
 import React from 'react';
 import { useStore } from '@/store';
 import type { OrderItem, Order } from '@/types';
+import { resolveTable } from '@/api/tables';
+import type { ApiTable } from '@/api/types';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -15,19 +17,28 @@ import ThemeToggle from '../Layout/ThemeToggle';
 
 export default function CustomerMenu() {
   const { t } = useTranslation();
-  const { menu, addOrder, user, setUser, addCustomer } = useStore();
+  const { menu, addOrder, user, addCustomer } = useStore();
   const [cart, setCart] = React.useState<{ [key: string]: number }>({});
   const [category, setCategory] = React.useState<'all' | 'food' | 'drink'>('all');
   const [step, setStep] = React.useState<'menu' | 'checkout' | 'success'>('menu');
   const [lastOrder, setLastOrder] = React.useState<Order | null>(null);
-  
+  const [tableInfo, setTableInfo] = React.useState<ApiTable | null>(null);
+  const [tableError, setTableError] = React.useState(false);
+
   const [customerInfo, setCustomerInfo] = React.useState({
     name: user?.name || '',
     email: user?.email || '',
     phone: user?.phone || ''
   });
 
-  const tableNumber = new URLSearchParams(window.location.search).get('table') || '1';
+  const qrToken = new URLSearchParams(window.location.search).get('token');
+
+  React.useEffect(() => {
+    if (!qrToken) return;
+    resolveTable(qrToken)
+      .then(setTableInfo)
+      .catch(() => setTableError(true));
+  }, [qrToken]);
 
   const addToCart = (id: string) => {
     setCart(prev => ({ ...prev, [id]: (prev[id] || 0) + 1 }));
@@ -66,8 +77,8 @@ export default function CustomerMenu() {
     });
 
     const newOrder: Order = {
-      id: Math.random().toString(36).substr(2, 9),
-      tableNumber,
+      id: Math.random().toString(36).substring(2, 11),
+      tableNumber: tableInfo?.number ?? '',
       items: orderItems,
       status: 'pending',
       platform: 'customer_pwa',
@@ -78,11 +89,10 @@ export default function CustomerMenu() {
     };
 
     addOrder(newOrder);
-    
-    // Save as guest if not logged in
+
     if (!user) {
       addCustomer({
-        id: Math.random().toString(36).substr(2, 9),
+        id: Math.random().toString(36).substring(2, 11),
         ...customerInfo,
         isRegistered: false,
         createdAt: new Date().toISOString()
@@ -94,6 +104,15 @@ export default function CustomerMenu() {
     setStep('success');
     toast.success(t('success.toast'));
   };
+
+  if (tableError) {
+    return (
+      <div className="max-w-md mx-auto px-4 py-16 text-center space-y-4">
+        <p className="text-2xl font-serif font-bold text-foreground">{t('table.invalidQr', 'Invalid QR code')}</p>
+        <p className="text-muted-foreground">{t('table.scanAgain', 'Please scan the QR code on your table again.')}</p>
+      </div>
+    );
+  }
 
   if (step === 'success' && lastOrder) {
     return (

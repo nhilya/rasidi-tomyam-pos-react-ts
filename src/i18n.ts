@@ -43,7 +43,7 @@ const resources = {
         orderId: "Order #",
         subtotal: "Subtotal",
         discount: "Discount",
-        total: "TOTAL",
+        total: "Total",
         pending: "Pending"
       },
       nav: {
@@ -292,7 +292,7 @@ const resources = {
         orderId: "Pesanan #",
         subtotal: "Jumlah Kecil",
         discount: "Diskaun",
-        total: "JUMLAH",
+        total: "Jumlah",
         pending: "Menunggu"
       },
       nav: {
@@ -324,7 +324,7 @@ const resources = {
       },
       dashboard: {
         welcome: "Selamat Kembali, Mak",
-        subtitle: "Inilah yang berlaku di kedai hari ini.",
+        subtitle: "Ringkasan aktiviti di kedai hari ini.",
         stats: {
           todaySales: "Jualan Hari Ini",
           activeOrders: "Pesanan Aktif",

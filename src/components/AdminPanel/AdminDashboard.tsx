@@ -1,28 +1,54 @@
-import { useStore } from '@/store';
+import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
-import { 
-  TrendingUp, 
-  Users, 
-  Package, 
-  ShoppingCart, 
-  ArrowRight, 
+import {
+  TrendingUp,
+  Users,
+  Package,
+  ShoppingCart,
+  ArrowRight,
   Clock,
   CheckCircle2,
   AlertTriangle
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
-
 import { useTranslation } from 'react-i18next';
+import { getDailySales, getOrders, getMenu, getCustomers } from '@/api';
+import type { ApiOrder, ApiMenuItem, DailySalesReport } from '@/api/types';
 
 export default function AdminDashboard() {
   const { t } = useTranslation();
-  const { orders, menu } = useStore();
 
-  const recentOrders = orders.slice(0, 5);
-  const lowStockItems = menu.filter(i => i.stock <= i.minStock);
+  const [dailySales, setDailySales] = React.useState<DailySalesReport | null>(null);
+  const [recentOrders, setRecentOrders] = React.useState<ApiOrder[]>([]);
+  const [activeCount, setActiveCount] = React.useState(0);
+  const [lowStockItems, setLowStockItems] = React.useState<ApiMenuItem[]>([]);
+  const [customerTotal, setCustomerTotal] = React.useState<number | null>(null);
+  const [loading, setLoading] = React.useState(true);
+
+  React.useEffect(() => {
+    const today = new Date().toISOString().slice(0, 10);
+
+    Promise.all([
+      getDailySales(today),
+      getOrders({ date: today }),
+      getMenu({ low_stock: 1 }),
+      getCustomers(),
+    ])
+      .then(([sales, orders, menuRes, customersRes]) => {
+        setDailySales(sales);
+        setRecentOrders(orders.data.slice(0, 5));
+        setActiveCount(
+          orders.data.filter(o => o.status !== 'paid' && o.status !== 'cancelled').length
+        );
+        setLowStockItems(menuRes.data);
+        setCustomerTotal(customersRes.meta.total);
+      })
+      .catch(console.error)
+      .finally(() => setLoading(false));
+  }, []);
 
   return (
     <div className="space-y-8">
@@ -33,28 +59,28 @@ export default function AdminDashboard() {
 
       {/* Quick Stats */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatCard 
-          title={t('dashboard.stats.todaySales')} 
-          value={`$${orders.filter(o => o.status === 'paid').reduce((s, o) => s + o.total, 0).toFixed(2)}`} 
-          icon={TrendingUp} 
+        <StatCard
+          title={t('dashboard.stats.todaySales')}
+          value={loading ? '—' : `RM ${parseFloat(dailySales?.total_sales ?? '0').toFixed(2)}`}
+          icon={TrendingUp}
           color="text-green-600"
         />
-        <StatCard 
-          title={t('dashboard.stats.activeOrders')} 
-          value={orders.filter(o => o.status !== 'paid' && o.status !== 'cancelled').length.toString()} 
-          icon={ShoppingCart} 
+        <StatCard
+          title={t('dashboard.stats.activeOrders')}
+          value={loading ? '—' : activeCount.toString()}
+          icon={ShoppingCart}
           color="text-blue-600"
         />
-        <StatCard 
-          title={t('dashboard.stats.lowStock')} 
-          value={lowStockItems.length.toString()} 
-          icon={Package} 
+        <StatCard
+          title={t('dashboard.stats.lowStock')}
+          value={loading ? '—' : lowStockItems.length.toString()}
+          icon={Package}
           color="text-amber-600"
         />
-        <StatCard 
-          title={t('dashboard.stats.totalCustomers')} 
-          value="124" 
-          icon={Users} 
+        <StatCard
+          title={t('dashboard.stats.totalCustomers')}
+          value={loading ? '—' : (customerTotal ?? 0).toString()}
+          icon={Users}
           color="text-foreground"
         />
       </div>
@@ -82,12 +108,14 @@ export default function AdminDashboard() {
                         <Clock className="w-5 h-5 text-muted-foreground" />
                       </div>
                       <div>
-                        <p className="text-sm font-bold text-foreground">{t('dashboard.table', { number: order.tableNumber })}</p>
-                        <p className="text-xs text-muted-foreground">{new Date(order.createdAt).toLocaleTimeString()}</p>
+                        <p className="text-sm font-bold text-foreground">
+                          {order.table_id ? t('dashboard.table', { number: order.table_id }) : `#${order.id}`}
+                        </p>
+                        <p className="text-xs text-muted-foreground">{new Date(order.created_at).toLocaleTimeString()}</p>
                       </div>
                     </div>
                     <div className="text-right">
-                      <p className="text-sm font-bold text-foreground">${order.total.toFixed(2)}</p>
+                      <p className="text-sm font-bold text-foreground">RM {parseFloat(order.total_amount).toFixed(2)}</p>
                       <Badge variant="outline" className="text-[10px] uppercase px-1 h-4">
                         {order.status}
                       </Badge>
@@ -142,7 +170,12 @@ export default function AdminDashboard() {
   );
 }
 
-function StatCard({ title, value, icon: Icon, color }: any) {
+function StatCard({ title, value, icon: Icon, color }: {
+  title: string;
+  value: string;
+  icon: React.ElementType;
+  color: string;
+}) {
   return (
     <Card className="border-border shadow-sm">
       <CardContent className="p-6">
@@ -159,5 +192,3 @@ function StatCard({ title, value, icon: Icon, color }: any) {
     </Card>
   );
 }
-
-
