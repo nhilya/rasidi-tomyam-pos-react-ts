@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { LayoutDashboard, Utensils, ClipboardList, Package, BarChart3, Users, LogOut, Menu as MenuIcon, X, DollarSign, ChevronLeft, ChevronRight, QrCode } from 'lucide-react';
+import { LayoutDashboard, ClipboardList, Package, BarChart3, Users, LogOut, Menu as MenuIcon, X, DollarSign, ChevronLeft, ChevronRight, QrCode } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useStore } from '@/store';
 import { cn } from '@/lib/utils';

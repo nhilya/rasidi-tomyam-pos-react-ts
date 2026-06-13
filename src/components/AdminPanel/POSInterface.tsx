@@ -1,105 +1,72 @@
 import React from 'react';
-import { useStore } from '@/store';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Search, Filter, CheckCircle2, Clock, FileText, Plus, ShoppingBag, Globe, RefreshCw, ClipboardList } from 'lucide-react';
+import { Search, Filter, CheckCircle2, Clock, FileText, Plus, ShoppingBag, Globe, RefreshCw, ClipboardList, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import Receipt from '../Finance/Receipt';
-import { Order, OrderPlatform } from '@/types';
+import type { ApiOrder } from '@/api/types';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
+import { getOrders, patchOrderStatus } from '@/api/orders';
+import type { OrderPlatform } from '@/types';
 
 export default function POSInterface() {
   const { t } = useTranslation();
-	const navigate = useNavigate();
-  const { orders, addOrder, updateOrder, menu, user } = useStore();
+  const navigate = useNavigate();
+  const [orders, setOrders] = React.useState<ApiOrder[]>([]);
+  const [loading, setLoading] = React.useState(true);
+  const [isSyncing, setIsSyncing] = React.useState(false);
   const [searchTerm, setSearchTerm] = React.useState('');
-  const [selectedOrder, setSelectedOrder] = React.useState<Order | null>(null);
+  const [selectedOrder, setSelectedOrder] = React.useState<ApiOrder | null>(null);
   const [isManualOrderOpen, setIsManualOrderOpen] = React.useState(false);
   const [manualOrder, setManualOrder] = React.useState({
-    platform: 'foodpanda' as OrderPlatform,
+    platform: 'foodpanda' as 'foodpanda' | 'shopeefood',
     total: '',
     notes: ''
   });
 
-  const [isSyncing, setIsSyncing] = React.useState(false);
+  const fetchOrders = React.useCallback(() => {
+    return getOrders()
+      .then(res => setOrders(res.data))
+      .catch(() => toast.error('Failed to load orders'));
+  }, []);
 
-  const handleSync = () => {
-    setIsSyncing(true);
-    // Simulate API call
-    setTimeout(() => {
-      const mockExternalOrders: Order[] = [
-        {
-          id: 'fp-' + Math.random().toString(36).substr(2, 5),
-          tableNumber: 'EXT',
-          items: [],
-          status: 'paid',
-          platform: 'foodpanda',
-          total: 45.50,
-          createdAt: new Date().toISOString(),
-          paidAt: new Date().toISOString(),
-          paymentMethod: 'online',
-          createdBy: 'system',
-          customerDetails: { name: 'FOODPANDA Sync', email: '', phone: '' }
-        },
-        {
-          id: 'sf-' + Math.random().toString(36).substr(2, 5),
-          tableNumber: 'EXT',
-          items: [],
-          status: 'paid',
-          platform: 'shopeefood',
-          total: 32.80,
-          createdAt: new Date().toISOString(),
-          paidAt: new Date().toISOString(),
-          paymentMethod: 'online',
-          createdBy: 'system',
-          customerDetails: { name: 'SHOPEEFOOD Sync', email: '', phone: '' }
-        }
-      ];
-      
-      mockExternalOrders.forEach(addOrder);
-      setIsSyncing(false);
-      toast.success(t('pos.syncSuccess', { count: 2 }));
-    }, 2000);
-  };
+  React.useEffect(() => {
+    fetchOrders().finally(() => setLoading(false));
+  }, [fetchOrders]);
 
-  const filteredOrders = orders.filter(o => 
-    o.tableNumber.includes(searchTerm) || 
-    o.id.includes(searchTerm) ||
-    o.customerDetails?.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+  const filteredOrders = orders.filter(o =>
+    String(o.table_id ?? '').includes(searchTerm) ||
+    String(o.id).includes(searchTerm) ||
+    (o.customer?.name ?? '').toLowerCase().includes(searchTerm.toLowerCase()) ||
     o.platform.includes(searchTerm.toLowerCase())
   );
 
-  const handleManualOrderSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!manualOrder.total) return;
+  const handleSync = async () => {
+    setIsSyncing(true);
+    try {
+      await fetchOrders();
+      toast.success(t('pos.syncSuccess', { count: orders.length }));
+    } finally {
+      setIsSyncing(false);
+    }
+  };
 
-    const newOrder: Order = {
-      id: Math.random().toString(36).substr(2, 9),
-      tableNumber: 'EXT',
-      items: [], // Bulk entry doesn't track individual items for simplicity
-      status: 'paid',
-      platform: manualOrder.platform,
-      total: parseFloat(manualOrder.total),
-      createdAt: new Date().toISOString(),
-      paidAt: new Date().toISOString(),
-      paymentMethod: 'online',
-      createdBy: user?.id || 'admin',
-      customerDetails: {
-        name: manualOrder.platform.toUpperCase() + ' Order',
-        email: '',
-        phone: ''
-      }
-    };
-
-    addOrder(newOrder);
-    setIsManualOrderOpen(false);
-    setManualOrder({ platform: 'foodpanda', total: '', notes: '' });
-    toast.success(t('pos.orderRecorded', { platform: manualOrder.platform }));
+  const handleStatusUpdate = async (orderId: number, status: ApiOrder['status']) => {
+    try {
+      const updated = await patchOrderStatus(orderId, {
+        status,
+        ...(status === 'paid' ? { payment_method: 'cash' } : {}),
+      });
+      setOrders(prev => prev.map(o => o.id === updated.id ? updated : o));
+      toast.success(t('pos.orderUpdated', { id: String(orderId).slice(0, 4), status }));
+    } catch {
+      toast.error('Failed to update order status');
+    }
   };
 
   const getPlatformIcon = (platform: OrderPlatform) => {
@@ -121,14 +88,6 @@ export default function POSInterface() {
     }
   };
 
-  const handleStatusUpdate = (orderId: string, status: any) => {
-    updateOrder(orderId, { 
-      status,
-      ...(status === 'paid' ? { paidAt: new Date().toISOString(), paymentMethod: 'cash' } : {})
-    });
-    toast.success(t('pos.orderUpdated', { id: orderId.slice(0, 4), status }));
-  };
-
   return (
     <div className="space-y-6">
       <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
@@ -136,12 +95,11 @@ export default function POSInterface() {
           <h2 className="text-3xl font-serif font-bold text-foreground">{t('pos.title')}</h2>
           <p className="text-muted-foreground">{t('pos.subtitle')}</p>
         </div>
-        
+
         <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-3 w-full">
-          {/* Action Buttons Group */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 w-full flex-1 min-w-0">
-            <Button 
-              variant="default" 
+            <Button
+              variant="default"
               className="min-h-8 w-full border-border whitespace-normal sm:whitespace-nowrap break-words text-center flex items-center justify-center gap-1"
               onClick={() => navigate('/take-order')}
             >
@@ -149,9 +107,9 @@ export default function POSInterface() {
               {t('pos.takeOrder')}
             </Button>
 
-            <Button 
-              variant="outline" 
-              onClick={handleSync} 
+            <Button
+              variant="outline"
+              onClick={handleSync}
               disabled={isSyncing}
               className="min-h-8 w-full border-border whitespace-normal sm:whitespace-nowrap break-words text-center flex items-center justify-center gap-1"
             >
@@ -172,22 +130,29 @@ export default function POSInterface() {
                 <DialogHeader>
                   <DialogTitle>{t('pos.recordExternal')}</DialogTitle>
                 </DialogHeader>
-                <form onSubmit={handleManualOrderSubmit} className="space-y-4 pt-4">
+                <form
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    toast.info('External order recording requires item-level data. Use the sync feature for platform orders.');
+                    setIsManualOrderOpen(false);
+                  }}
+                  className="space-y-4 pt-4"
+                >
                   <div className="space-y-2">
                     <label className="text-sm font-medium">{t('pos.platform')}</label>
                     <div className="grid grid-cols-2 gap-2">
-                      <Button 
+                      <Button
                         type="button"
                         variant={manualOrder.platform === 'foodpanda' ? 'default' : 'outline'}
-                        onClick={() => setManualOrder({...manualOrder, platform: 'foodpanda'})}
+                        onClick={() => setManualOrder({ ...manualOrder, platform: 'foodpanda' })}
                         className="w-full"
                       >
                         FoodPanda
                       </Button>
-                      <Button 
+                      <Button
                         type="button"
                         variant={manualOrder.platform === 'shopeefood' ? 'default' : 'outline'}
-                        onClick={() => setManualOrder({...manualOrder, platform: 'shopeefood'})}
+                        onClick={() => setManualOrder({ ...manualOrder, platform: 'shopeefood' })}
                         className="w-full"
                       >
                         ShopeeFood
@@ -196,21 +161,21 @@ export default function POSInterface() {
                   </div>
                   <div className="space-y-2">
                     <label className="text-sm font-medium">{t('pos.amount')}</label>
-                    <Input 
-                      type="number" 
-                      step="0.01" 
-                      placeholder="0.00" 
+                    <Input
+                      type="number"
+                      step="0.01"
+                      placeholder="0.00"
                       value={manualOrder.total}
-                      onChange={(e) => setManualOrder({...manualOrder, total: e.target.value})}
+                      onChange={(e) => setManualOrder({ ...manualOrder, total: e.target.value })}
                       required
                     />
                   </div>
                   <div className="space-y-2">
                     <label className="text-sm font-medium">{t('pos.notes')}</label>
-                    <Input 
-                      placeholder={t('pos.notesPlaceholder')} 
+                    <Input
+                      placeholder={t('pos.notesPlaceholder')}
                       value={manualOrder.notes}
-                      onChange={(e) => setManualOrder({...manualOrder, notes: e.target.value})}
+                      onChange={(e) => setManualOrder({ ...manualOrder, notes: e.target.value })}
                     />
                   </div>
                   <Button type="submit" className="w-full">{t('pos.record')}</Button>
@@ -219,12 +184,11 @@ export default function POSInterface() {
             </Dialog>
           </div>
 
-          {/* Search and Filter Group */}
           <div className="flex gap-2 w-full lg:w-auto max-w-full lg:max-w-[420px] min-w-0">
             <div className="relative flex-1 min-w-0">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400" />
-              <Input 
-                placeholder={t('pos.search')} 
+              <Input
+                placeholder={t('pos.search')}
                 className="h-8 w-full pl-10 border border-border bg-white"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
@@ -238,7 +202,6 @@ export default function POSInterface() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Active Orders List */}
         <div className="lg:col-span-2 space-y-4">
           <Card className="border-border shadow-sm">
             <Table>
@@ -253,7 +216,13 @@ export default function POSInterface() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredOrders.length === 0 ? (
+                {loading ? (
+                  <TableRow>
+                    <TableCell colSpan={6} className="h-32 text-center text-muted-foreground">
+                      <Loader2 className="w-5 h-5 animate-spin mx-auto" />
+                    </TableCell>
+                  </TableRow>
+                ) : filteredOrders.length === 0 ? (
                   <TableRow>
                     <TableCell colSpan={6} className="h-32 text-center text-muted-foreground">
                       {t('pos.noOrders')}
@@ -265,19 +234,19 @@ export default function POSInterface() {
                       <TableCell className="font-mono text-xs">
                         <div className="flex items-center gap-2">
                           {getPlatformIcon(order.platform)}
-                          #{order.id.slice(0, 8)}
+                          #{String(order.id).slice(0, 8)}
                         </div>
                       </TableCell>
                       <TableCell className="font-bold">
-                        {order.tableNumber === 'EXT' ? t('pos.delivery') : `${t('pos.table')} ${order.tableNumber}`}
+                        {order.table_id ? `${t('pos.table')} ${order.table_id}` : t('pos.delivery')}
                       </TableCell>
                       <TableCell>
                         <div className="text-xs">
-                          <p className="font-medium text-foreground">{order.customerDetails?.name || t('pos.guest')}</p>
-                          <p className="text-muted-foreground">{order.customerDetails?.phone || t('pos.noPhone')}</p>
+                          <p className="font-medium text-foreground">{order.customer?.name || t('pos.guest')}</p>
+                          <p className="text-muted-foreground">{order.customer?.phone || t('pos.noPhone')}</p>
                         </div>
                       </TableCell>
-                      <TableCell className="font-medium">${order.total.toFixed(2)}</TableCell>
+                      <TableCell className="font-medium">RM {parseFloat(order.total_amount).toFixed(2)}</TableCell>
                       <TableCell>
                         <Badge variant="outline" className={getStatusColor(order.status)}>
                           {order.status}
@@ -326,7 +295,6 @@ export default function POSInterface() {
           </Card>
         </div>
 
-        {/* Quick Stats / Summary */}
         <div className="space-y-6">
           <Card className="border-border shadow-sm">
             <CardHeader>
@@ -369,9 +337,11 @@ export default function POSInterface() {
             </CardHeader>
             <CardContent>
               <div className="text-3xl font-bold">
-                ${orders.filter(o => o.status === 'paid').reduce((sum, o) => sum + o.total, 0).toFixed(2)}
+                RM {orders.filter(o => o.status === 'paid').reduce((sum, o) => sum + parseFloat(o.total_amount), 0).toFixed(2)}
               </div>
-              <p className="text-primary-foreground/70 text-xs mt-2">{t('pos.completedOrders', { count: orders.filter(o => o.status === 'paid').length })}</p>
+              <p className="text-primary-foreground/70 text-xs mt-2">
+                {t('pos.completedOrders', { count: orders.filter(o => o.status === 'paid').length })}
+              </p>
             </CardContent>
           </Card>
         </div>
@@ -380,20 +350,9 @@ export default function POSInterface() {
   );
 }
 
-function Monitor(props: any) {
+function Monitor(props: React.SVGProps<SVGSVGElement>) {
   return (
-    <svg
-      {...props}
-      xmlns="http://www.w3.org/2000/svg"
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
+    <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
       <rect width="20" height="14" x="2" y="3" rx="2" />
       <line x1="8" y1="21" x2="16" y2="21" />
       <line x1="12" y1="17" x2="12" y2="21" />
@@ -401,20 +360,9 @@ function Monitor(props: any) {
   );
 }
 
-function Utensils(props: any) {
+function Utensils(props: React.SVGProps<SVGSVGElement>) {
   return (
-    <svg
-      {...props}
-      xmlns="http://www.w3.org/2000/svg"
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
+    <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
       <path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2" />
       <path d="M7 2v20" />
       <path d="M21 15V2v0a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Zm0 0v7" />

@@ -67,8 +67,9 @@ const resources = {
         password: "Password",
         signIn: "Sign In",
         roles: {
-          super_admin: "Super Admin (Mom)",
+          super_admin: "Super Admin",
           manager: "Manager",
+          supervisor: "Supervisor",
           cashier: "Cashier",
           server: "Server"
         }
@@ -316,8 +317,9 @@ const resources = {
         password: "Kata Laluan",
         signIn: "Log Masuk",
         roles: {
-          super_admin: "Super Admin (Mak)",
+          super_admin: "Super Admin",
           manager: "Pengurus",
+          supervisor: "Penyelia",
           cashier: "Juruwang",
           server: "Pelayan"
         }
@@ -567,6 +569,7 @@ const resources = {
         roles: {
           super_admin: "ผู้ดูแลระบบสูงสุด (คุณแม่)",
           manager: "ผู้จัดการ",
+          supervisor: "ซูเปอร์ไวเซอร์",
           cashier: "พนักงานแคชเชียร์",
           server: "พนักงานเสิร์ฟ"
         }

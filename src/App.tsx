@@ -1,6 +1,8 @@
+import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { ThemeProvider } from './components/ui/theme-provider';
 import { useStore } from './store';
+import type { Role } from './types';
 import Layout from './components/Layout/Layout';
 import CustomerMenu from './components/Customer/CustomerMenu';
 import Login from './components/AdminPanel/Login';
@@ -12,9 +14,44 @@ import CustomerManagement from './components/Customer/CustomerManagement';
 import Reports from './components/Analytics/Reports';
 import QRGenerator from './components/AdminPanel/QrGenerator';
 import StaffOrdering from './components/AdminPanel/StaffOrdering';
+import { getToken, clearToken } from './lib/api';
+import { getMe } from './api/auth';
 
 export default function App() {
-  const { user } = useStore();
+  const { user, setUser } = useStore();
+  const [initialized, setInitialized] = React.useState(false);
+
+  React.useEffect(() => {
+    const token = getToken();
+    if (!token) {
+      setInitialized(true);
+      return;
+    }
+    getMe()
+      .then(apiUser => {
+        setUser({
+          id: String(apiUser.id),
+          name: apiUser.name,
+          email: apiUser.email,
+          role: (apiUser.roles[0] as Role) ?? 'cashier',
+          phone: apiUser.phone ?? undefined,
+        });
+      })
+      .catch(() => {
+        clearToken();
+      })
+      .finally(() => setInitialized(true));
+  }, [setUser]);
+
+  if (!initialized) {
+    return (
+      <ThemeProvider defaultTheme="system" enableSystem>
+        <div className="min-h-screen bg-background flex items-center justify-center">
+          <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+        </div>
+      </ThemeProvider>
+    );
+  }
 
   return (
     <ThemeProvider defaultTheme="system" enableSystem>

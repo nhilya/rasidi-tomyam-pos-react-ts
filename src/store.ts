@@ -17,7 +17,7 @@ interface AppState {
 }
 
 export const useStore = create<AppState>((set) => ({
-  user: { id: '1', name: 'Super Mom', email: 'mom@shop.com', role: 'super_admin' }, // Default for dev
+  user: null,
   menu: [
     { id: 'm1', name: 'Nasi Lemak', description: 'Classic Malaysian breakfast', price: 8.5, category: 'food', stock: 50, minStock: 10 },
     { id: 'm2', name: 'Teh Tarik', description: 'Pulled milk tea', price: 3.0, category: 'drink', stock: 100, minStock: 20 },

@@ -1,41 +1,52 @@
 import React from "react";
-import { useStore } from "@/store";
-import { OrderItem, Order } from "@/types";
+import type { ApiMenuItem, ApiOrder, ApiTable } from "@/api/types";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Plus, Minus, Utensils, ArrowLeft, CheckCircle2, Search } from "lucide-react";
+import { Plus, Minus, Utensils, ArrowLeft, CheckCircle2, Search, Loader2 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import { toast } from "sonner";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import ThemeToggle from "../Layout/ThemeToggle";
 import Receipt from "../Finance/Receipt";
-
+import { getMenu } from "@/api/menu";
+import { getTables } from "@/api/tables";
+import { createOrder } from "@/api/orders";
 
 export default function StaffOrdering() {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const { menu, addOrder, user } = useStore();
+
+  const [apiMenu, setApiMenu] = React.useState<ApiMenuItem[]>([]);
+  const [tables, setTables] = React.useState<ApiTable[]>([]);
+  const [menuLoading, setMenuLoading] = React.useState(true);
+  const [tablesLoading, setTablesLoading] = React.useState(true);
 
   const [cart, setCart] = React.useState<{ [key: string]: number }>({});
-  const [category, setCategory] = React.useState<"all" | "food" | "drink">(
-    "all",
-  );
-  const [step, setStep] = React.useState<
-    "table" | "menu" | "checkout" | "success"
-  >("table");
-  const [tableNumber, setTableNumber] = React.useState("");
-  const [lastOrder, setLastOrder] = React.useState<Order | null>(null);
+  const [category, setCategory] = React.useState<"all" | "food" | "drink">("all");
+  const [step, setStep] = React.useState<"table" | "menu" | "checkout" | "success">("table");
+  const [selectedTable, setSelectedTable] = React.useState<ApiTable | null>(null);
+  const [lastOrder, setLastOrder] = React.useState<ApiOrder | null>(null);
   const [searchTerm, setSearchTerm] = React.useState("");
+  const [placing, setPlacing] = React.useState(false);
 
-  const addToCart = (id: string) => {
+  React.useEffect(() => {
+    getMenu()
+      .then(res => setApiMenu(res.data))
+      .catch(() => toast.error("Failed to load menu"))
+      .finally(() => setMenuLoading(false));
+    getTables()
+      .then(res => setTables(res.data))
+      .catch(() => toast.error("Failed to load tables"))
+      .finally(() => setTablesLoading(false));
+  }, []);
+
+  const addToCart = (id: number) => {
     setCart((prev) => ({ ...prev, [id]: (prev[id] || 0) + 1 }));
   };
 
-  const removeFromCart = (id: string) => {
+  const removeFromCart = (id: number) => {
     setCart((prev) => {
       const next = { ...prev };
       if (next[id] > 1) next[id]--;
@@ -44,57 +55,42 @@ export default function StaffOrdering() {
     });
   };
 
-  const totalItems = Object.values(cart).reduce(
-    (a, b) => (a as number) + (b as number),
-    0,
-  ) as number;
+  const totalItems = Object.values(cart).reduce((a, b) => a + b, 0);
   const totalPrice = Object.entries(cart).reduce((sum, [id, qty]) => {
-    const item = menu.find((m) => m.id === id);
-    return (sum as number) + (item?.price || 0) * (qty as number);
-  }, 0) as number;
+    const item = apiMenu.find((m) => m.id === Number(id));
+    return sum + (item ? parseFloat(item.price) : 0) * qty;
+  }, 0);
 
-  const filteredMenu = menu.filter(
+  const filteredMenu = apiMenu.filter(
     (item) =>
       (category === "all" || item.category === category) &&
       item.name.toLowerCase().includes(searchTerm.toLowerCase()),
   );
 
-  const handlePlaceOrder = () => {
-    if (!tableNumber) {
+  const handlePlaceOrder = async () => {
+    if (!selectedTable) {
       toast.error(t("pos.selectTable"));
       return;
     }
-
-    const orderItems: OrderItem[] = Object.entries(cart).map(([id, qty]) => {
-      const item = menu.find((m) => m.id === id)!;
-      return {
-        menuItemId: id,
-        quantity: qty as number,
-        price: item.price,
-      };
-    });
-
-    const newOrder: Order = {
-      id: Math.random().toString(36).substr(2, 9),
-      tableNumber,
-      items: orderItems,
-      status: "pending",
-      platform: "pos",
-      total: totalPrice,
-      createdAt: new Date().toISOString(),
-      createdBy: user?.id || "staff",
-      customerDetails: {
-        name: "Staff Order",
-        email: "",
-        phone: "",
-      },
-    };
-
-    addOrder(newOrder);
-    setLastOrder(newOrder);
-    setCart({});
-    setStep("success");
-    toast.success(t("pos.orderPlaced"));
+    setPlacing(true);
+    try {
+      const order = await createOrder({
+        table_id: selectedTable.id,
+        platform: "pos",
+        items: Object.entries(cart).map(([id, qty]) => ({
+          menu_item_id: Number(id),
+          quantity: qty,
+        })),
+      });
+      setLastOrder(order);
+      setCart({});
+      setStep("success");
+      toast.success(t("pos.orderPlaced"));
+    } catch {
+      toast.error("Failed to place order");
+    } finally {
+      setPlacing(false);
+    }
   };
 
   if (step === "table") {
@@ -109,33 +105,27 @@ export default function StaffOrdering() {
 
         <Card className="border-border">
           <CardContent className="pt-6 space-y-4">
-            <div className="grid grid-cols-3 gap-3">
-              {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((num) => (
-                <Button
-                  key={num}
-                  variant={
-                    tableNumber === num.toString() ? "default" : "outline"
-                  }
-                  className="h-16 text-xl font-bold"
-                  onClick={() => setTableNumber(num.toString())}
-                >
-                  {num}
-                </Button>
-              ))}
-            </div>
-            <div className="pt-4">
-              <Label>{t("qr.tablePlaceholder")}</Label>
-              <Input
-                type="text"
-                placeholder="e.g. 10, A1, VIP"
-                value={tableNumber}
-                onChange={(e) => setTableNumber(e.target.value)}
-                className="mt-2 text-center text-xl font-bold h-12"
-              />
-            </div>
+            {tablesLoading ? (
+              <div className="flex justify-center py-4">
+                <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
+              </div>
+            ) : (
+              <div className="grid grid-cols-3 gap-3">
+                {tables.map((table) => (
+                  <Button
+                    key={table.id}
+                    variant={selectedTable?.id === table.id ? "default" : "outline"}
+                    className="h-16 text-base font-bold"
+                    onClick={() => setSelectedTable(table)}
+                  >
+                    {table.number}
+                  </Button>
+                ))}
+              </div>
+            )}
             <Button
               className="w-full h-12 text-lg font-bold mt-4"
-              disabled={!tableNumber}
+              disabled={!selectedTable}
               onClick={() => setStep("menu")}
             >
               {t("pos.takeOrder")}
@@ -172,7 +162,7 @@ export default function StaffOrdering() {
             className="w-full h-12 font-bold"
             onClick={() => {
               setCart({});
-              setTableNumber("");
+              setSelectedTable(null);
               setStep("table");
             }}
           >
@@ -205,27 +195,22 @@ export default function StaffOrdering() {
         <Card className="border-border">
           <CardHeader>
             <CardTitle className="text-lg text-foreground">
-              {t("pos.orderForTable", { number: tableNumber })}
+              {t("pos.orderForTable", { number: selectedTable?.number ?? '' })}
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-2">
             {Object.entries(cart).map(([id, qty]) => {
-              const item = menu.find((m) => m.id === id)!;
+              const item = apiMenu.find((m) => m.id === Number(id))!;
               return (
-                <div
-                  key={id}
-                  className="flex justify-between text-sm text-foreground"
-                >
-                  <span>
-                    {item.name} x {qty}
-                  </span>
-                  <span>${(item.price * (qty as number)).toFixed(2)}</span>
+                <div key={id} className="flex justify-between text-sm text-foreground">
+                  <span>{item.name} x {qty}</span>
+                  <span>RM {(parseFloat(item.price) * qty).toFixed(2)}</span>
                 </div>
               );
             })}
             <div className="pt-4 border-t border-border flex justify-between font-bold text-lg text-foreground">
               <span>{t("cart.total")}</span>
-              <span>${totalPrice.toFixed(2)}</span>
+              <span>RM {totalPrice.toFixed(2)}</span>
             </div>
           </CardContent>
         </Card>
@@ -233,7 +218,9 @@ export default function StaffOrdering() {
         <Button
           className="w-full h-14 text-lg font-bold bg-primary text-primary-foreground"
           onClick={handlePlaceOrder}
+          disabled={placing}
         >
+          {placing && <Loader2 className="w-4 h-4 animate-spin mr-2" />}
           {t("pos.confirmOrder")}
         </Button>
       </div>
@@ -249,7 +236,7 @@ export default function StaffOrdering() {
           </Button>
           <div>
             <h2 className="text-xl font-serif font-bold text-foreground">
-              {t("pos.orderForTable", { number: tableNumber })}
+              {t("pos.orderForTable", { number: selectedTable?.number ?? '' })}
             </h2>
           </div>
         </div>
@@ -258,7 +245,6 @@ export default function StaffOrdering() {
         </div>
       </div>
 
-      {/* Search */}
       <div className="relative mb-6">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
         <Input
@@ -269,80 +255,81 @@ export default function StaffOrdering() {
         />
       </div>
 
-      {/* Categories */}
       <div className="flex gap-2 mb-6 overflow-x-auto pb-2 scrollbar-hide">
         {["all", "food", "drink"].map((cat) => (
           <Button
             key={cat}
             variant={category === cat ? "default" : "outline"}
             className="rounded-full capitalize h-9"
-            onClick={() => setCategory(cat as any)}
+            onClick={() => setCategory(cat as "all" | "food" | "drink")}
           >
             {t(`categories.${cat}`)}
           </Button>
         ))}
       </div>
 
-      {/* Menu Items */}
-      <div className="grid gap-3 pb-24">
-        {filteredMenu.map((item) => (
-          <motion.div layout key={item.id}>
-            <Card className="overflow-hidden border-border shadow-sm">
-              <div className="flex p-3 gap-3">
-                <div className="w-16 h-16 bg-muted rounded-lg flex-shrink-0 flex items-center justify-center text-muted-foreground">
-                  <Utensils className="w-6 h-6" />
-                </div>
-                <div className="flex-1 flex flex-col justify-between">
-                  <div className="flex justify-between items-start">
-                    <h3 className="font-bold text-sm text-foreground">
-                      {item.name}
-                    </h3>
-                    <span className="font-bold text-sm text-foreground">
-                      ${item.price.toFixed(2)}
-                    </span>
+      {menuLoading ? (
+        <div className="flex justify-center py-12">
+          <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
+        </div>
+      ) : (
+        <div className="grid gap-3 pb-24">
+          {filteredMenu.map((item) => (
+            <motion.div layout key={item.id}>
+              <Card className="overflow-hidden border-border shadow-sm">
+                <div className="flex p-3 gap-3">
+                  <div className="w-16 h-16 bg-muted rounded-lg flex-shrink-0 flex items-center justify-center text-muted-foreground">
+                    <Utensils className="w-6 h-6" />
                   </div>
+                  <div className="flex-1 flex flex-col justify-between">
+                    <div className="flex justify-between items-start">
+                      <h3 className="font-bold text-sm text-foreground">{item.name}</h3>
+                      <span className="font-bold text-sm text-foreground">
+                        RM {parseFloat(item.price).toFixed(2)}
+                      </span>
+                    </div>
 
-                  <div className="flex justify-end items-center gap-3 mt-1">
-                    {cart[item.id] ? (
-                      <div className="flex items-center gap-3 bg-muted rounded-full px-2 py-1">
+                    <div className="flex justify-end items-center gap-3 mt-1">
+                      {cart[item.id] ? (
+                        <div className="flex items-center gap-3 bg-muted rounded-full px-2 py-1">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-6 w-6 rounded-full"
+                            onClick={() => removeFromCart(item.id)}
+                          >
+                            <Minus className="w-3 h-3" />
+                          </Button>
+                          <span className="text-sm font-bold min-w-[1rem] text-center">
+                            {cart[item.id]}
+                          </span>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-6 w-6 rounded-full"
+                            onClick={() => addToCart(item.id)}
+                          >
+                            <Plus className="w-3 h-3" />
+                          </Button>
+                        </div>
+                      ) : (
                         <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-6 w-6 rounded-full"
-                          onClick={() => removeFromCart(item.id)}
-                        >
-                          <Minus className="w-3 h-3" />
-                        </Button>
-                        <span className="text-sm font-bold min-w-[1rem] text-center">
-                          {cart[item.id]}
-                        </span>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-6 w-6 rounded-full"
+                          size="sm"
+                          className="rounded-full h-8 px-4"
                           onClick={() => addToCart(item.id)}
                         >
-                          <Plus className="w-3 h-3" />
+                          {t("cart.add")}
                         </Button>
-                      </div>
-                    ) : (
-                      <Button
-                        size="sm"
-                        className="rounded-full h-8 px-4"
-                        onClick={() => addToCart(item.id)}
-                      >
-                        {t("cart.add")}
-                      </Button>
-                    )}
+                      )}
+                    </div>
                   </div>
                 </div>
-              </div>
-            </Card>
-          </motion.div>
-        ))}
-      </div>
+              </Card>
+            </motion.div>
+          ))}
+        </div>
+      )}
 
-      {/* Floating Cart Bar */}
       <AnimatePresence>
         {totalItems > 0 && (
           <motion.div
@@ -361,7 +348,7 @@ export default function StaffOrdering() {
                 </div>
                 <span className="font-bold">{t("cart.viewOrder")}</span>
               </div>
-              <span className="font-bold">${totalPrice.toFixed(2)}</span>
+              <span className="font-bold">RM {totalPrice.toFixed(2)}</span>
             </Button>
           </motion.div>
         )}

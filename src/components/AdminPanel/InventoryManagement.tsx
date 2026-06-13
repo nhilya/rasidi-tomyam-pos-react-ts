@@ -1,31 +1,42 @@
 import React from 'react';
-import { useStore } from '@/store';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { Plus, Search } from 'lucide-react';
+import { Plus, Search, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
-
 import { useTranslation } from 'react-i18next';
+import { getMenu, updateMenuItem } from '@/api/menu';
+import type { ApiMenuItem } from '@/api/types';
 
 export default function InventoryManagement() {
   const { t } = useTranslation();
-  const { menu, setMenu } = useStore();
+  const [menu, setMenu] = React.useState<ApiMenuItem[]>([]);
+  const [loading, setLoading] = React.useState(true);
   const [searchTerm, setSearchTerm] = React.useState('');
 
-  const filteredItems = menu.filter(item => 
+  React.useEffect(() => {
+    getMenu()
+      .then(res => setMenu(res.data))
+      .catch(() => toast.error('Failed to load inventory'))
+      .finally(() => setLoading(false));
+  }, []);
+
+  const filteredItems = menu.filter(item =>
     item.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const handleRestock = (id: string) => {
-    const amount = parseInt(prompt(t('inventory.restockPrompt'), '10') || '0');
-    if (amount > 0) {
-      setMenu(menu.map(item => 
-        item.id === id ? { ...item, stock: item.stock + amount } : item
-      ));
+  const handleRestock = async (item: ApiMenuItem) => {
+    const input = prompt(t('inventory.restockPrompt'), '10');
+    const amount = parseInt(input || '0');
+    if (amount <= 0) return;
+    try {
+      const updated = await updateMenuItem(item.id, { stock: item.stock + amount });
+      setMenu(prev => prev.map(m => m.id === updated.id ? updated : m));
       toast.success(t('inventory.restockSuccess'));
+    } catch {
+      toast.error('Failed to update stock');
     }
   };
 
@@ -39,8 +50,8 @@ export default function InventoryManagement() {
         <div className="flex gap-2 w-full md:w-auto">
           <div className="relative flex-1 md:w-64">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400" />
-            <Input 
-              placeholder={t('inventory.search')} 
+            <Input
+              placeholder={t('inventory.search')}
               className="h-8 pl-10"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
@@ -59,7 +70,7 @@ export default function InventoryManagement() {
             <CardTitle className="text-sm font-medium text-muted-foreground">{t('inventory.stats.totalItems')}</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-foreground">{menu.length}</div>
+            <div className="text-2xl font-bold text-foreground">{loading ? '—' : menu.length}</div>
           </CardContent>
         </Card>
         <Card className="border-border shadow-sm">
@@ -68,7 +79,7 @@ export default function InventoryManagement() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-red-600">
-              {menu.filter(i => i.stock <= i.minStock).length}
+              {loading ? '—' : menu.filter(i => i.is_low_stock).length}
             </div>
           </CardContent>
         </Card>
@@ -78,7 +89,7 @@ export default function InventoryManagement() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-muted-foreground">
-              {menu.filter(i => i.stock === 0).length}
+              {loading ? '—' : menu.filter(i => i.stock === 0).length}
             </div>
           </CardContent>
         </Card>
@@ -97,32 +108,46 @@ export default function InventoryManagement() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {filteredItems.map((item) => (
-              <TableRow key={item.id}>
-                <TableCell className="font-medium">{item.name}</TableCell>
-                <TableCell className="capitalize">{item.category}</TableCell>
-                <TableCell>
-                  <span className={item.stock <= item.minStock ? "text-red-600 font-bold" : ""}>
-                    {t('inventory.units', { count: item.stock })}
-                  </span>
-                </TableCell>
-                <TableCell className="text-muted-foreground">{t('inventory.units', { count: item.minStock })}</TableCell>
-                <TableCell>
-                  {item.stock === 0 ? (
-                    <Badge variant="destructive">{t('inventory.status.outOfStock')}</Badge>
-                  ) : item.stock <= item.minStock ? (
-                    <Badge variant="outline" className="bg-amber-50 dark:bg-amber-950/30 text-amber-700 dark:text-amber-400 border-amber-200 dark:border-amber-900">{t('inventory.status.lowStock')}</Badge>
-                  ) : (
-                    <Badge variant="outline" className="bg-green-50 dark:bg-green-950/30 text-green-700 dark:text-green-400 border-green-200 dark:border-green-900">{t('inventory.status.healthy')}</Badge>
-                  )}
-                </TableCell>
-                <TableCell className="text-right">
-                  <Button variant="ghost" size="sm" onClick={() => handleRestock(item.id)}>
-                    {t('dashboard.restock')}
-                  </Button>
+            {loading ? (
+              <TableRow>
+                <TableCell colSpan={6} className="h-32 text-center text-muted-foreground">
+                  <Loader2 className="w-5 h-5 animate-spin mx-auto" />
                 </TableCell>
               </TableRow>
-            ))}
+            ) : (
+              filteredItems.map((item) => (
+                <TableRow key={item.id}>
+                  <TableCell className="font-medium">{item.name}</TableCell>
+                  <TableCell className="capitalize">{item.category}</TableCell>
+                  <TableCell>
+                    <span className={item.is_low_stock ? 'text-red-600 font-bold' : ''}>
+                      {t('inventory.units', { count: item.stock })}
+                    </span>
+                  </TableCell>
+                  <TableCell className="text-muted-foreground">
+                    {t('inventory.units', { count: item.min_stock })}
+                  </TableCell>
+                  <TableCell>
+                    {item.stock === 0 ? (
+                      <Badge variant="destructive">{t('inventory.status.outOfStock')}</Badge>
+                    ) : item.is_low_stock ? (
+                      <Badge variant="outline" className="bg-amber-50 dark:bg-amber-950/30 text-amber-700 dark:text-amber-400 border-amber-200 dark:border-amber-900">
+                        {t('inventory.status.lowStock')}
+                      </Badge>
+                    ) : (
+                      <Badge variant="outline" className="bg-green-50 dark:bg-green-950/30 text-green-700 dark:text-green-400 border-green-200 dark:border-green-900">
+                        {t('inventory.status.healthy')}
+                      </Badge>
+                    )}
+                  </TableCell>
+                  <TableCell className="text-right">
+                    <Button variant="ghost" size="sm" onClick={() => handleRestock(item)}>
+                      {t('dashboard.restock')}
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              ))
+            )}
           </TableBody>
         </Table>
       </Card>

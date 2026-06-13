@@ -1,5 +1,4 @@
 import React from 'react';
-import { useStore } from '@/store';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -8,58 +7,69 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
-import { Plus, Search, FileText, Upload } from 'lucide-react';
+import { Plus, Search, FileText, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
-
 import { useTranslation } from 'react-i18next';
+import { getExpenses, createExpense } from '@/api/expenses';
+import type { ApiExpense } from '@/api/types';
 
 export default function ExpensesManagement() {
   const { t } = useTranslation();
-  const { expenses, addExpense, user } = useStore();
+  const [expenses, setExpenses] = React.useState<ApiExpense[]>([]);
+  const [loading, setLoading] = React.useState(true);
+  const [saving, setSaving] = React.useState(false);
   const [searchTerm, setSearchTerm] = React.useState('');
   const [isAddOpen, setIsAddOpen] = React.useState(false);
-  
+
   const [newExpense, setNewExpense] = React.useState({
-    type: 'inventory' as any,
+    type: 'inventory' as ApiExpense['type'],
     amount: '',
     description: '',
     date: new Date().toISOString().split('T')[0],
-    receiptUrl: ''
   });
 
-  const filteredExpenses = expenses.filter(e => 
+  React.useEffect(() => {
+    getExpenses()
+      .then(res => setExpenses(res.data))
+      .catch(() => toast.error('Failed to load expenses'))
+      .finally(() => setLoading(false));
+  }, []);
+
+  const filteredExpenses = expenses.filter(e =>
     e.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
     e.type.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const handleAddExpense = () => {
+  const handleAddExpense = async () => {
     if (!newExpense.amount || !newExpense.description) {
       toast.error(t('expenses.fillRequired'));
       return;
     }
-
-    addExpense({
-      id: Math.random().toString(36).substr(2, 9),
-      type: newExpense.type,
-      amount: parseFloat(newExpense.amount),
-      description: newExpense.description,
-      date: newExpense.date,
-      receiptUrl: newExpense.receiptUrl,
-      recordedBy: user?.name || 'Admin'
-    });
-
-    setIsAddOpen(false);
-    setNewExpense({
-      type: 'inventory',
-      amount: '',
-      description: '',
-      date: new Date().toISOString().split('T')[0],
-      receiptUrl: ''
-    });
-    toast.success(t('expenses.saveSuccess'));
+    setSaving(true);
+    try {
+      const created = await createExpense({
+        type: newExpense.type,
+        amount: parseFloat(newExpense.amount),
+        description: newExpense.description,
+        date: newExpense.date,
+      });
+      setExpenses(prev => [created, ...prev]);
+      setIsAddOpen(false);
+      setNewExpense({
+        type: 'inventory',
+        amount: '',
+        description: '',
+        date: new Date().toISOString().split('T')[0],
+      });
+      toast.success(t('expenses.saveSuccess'));
+    } catch {
+      toast.error('Failed to save expense');
+    } finally {
+      setSaving(false);
+    }
   };
 
-  const totalExpenses = expenses.reduce((sum, e) => sum + e.amount, 0);
+  const totalExpenses = expenses.reduce((sum, e) => sum + parseFloat(e.amount), 0);
 
   return (
     <div className="space-y-6">
@@ -71,14 +81,14 @@ export default function ExpensesManagement() {
         <div className="flex gap-2 w-full md:w-auto">
           <div className="relative flex-1 md:w-64">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400" />
-            <Input 
-              placeholder={t('expenses.search')} 
+            <Input
+              placeholder={t('expenses.search')}
               className="h-8 pl-10"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
           </div>
-          
+
           <Dialog open={isAddOpen} onOpenChange={setIsAddOpen}>
             <DialogTrigger
               render={
@@ -96,9 +106,9 @@ export default function ExpensesManagement() {
               <div className="grid gap-4 py-4">
                 <div className="grid gap-2">
                   <Label htmlFor="type">{t('expenses.type')}</Label>
-                  <Select 
-                    value={newExpense.type} 
-                    onValueChange={(v) => setNewExpense({...newExpense, type: v as any})}
+                  <Select
+                    value={newExpense.type}
+                    onValueChange={(v) => setNewExpense({ ...newExpense, type: v as ApiExpense['type'] })}
                   >
                     <SelectTrigger>
                       <SelectValue placeholder={t('expenses.selectType')} />
@@ -113,44 +123,39 @@ export default function ExpensesManagement() {
                 </div>
                 <div className="grid gap-2">
                   <Label htmlFor="amount">{t('expenses.amount')}</Label>
-                  <Input 
-                    id="amount" 
-                    type="number" 
+                  <Input
+                    id="amount"
+                    type="number"
                     placeholder="0.00"
                     value={newExpense.amount}
-                    onChange={e => setNewExpense({...newExpense, amount: e.target.value})}
+                    onChange={e => setNewExpense({ ...newExpense, amount: e.target.value })}
                   />
                 </div>
                 <div className="grid gap-2">
                   <Label htmlFor="description">{t('expenses.description')}</Label>
-                  <Input 
-                    id="description" 
+                  <Input
+                    id="description"
                     placeholder={t('expenses.descPlaceholder')}
                     value={newExpense.description}
-                    onChange={e => setNewExpense({...newExpense, description: e.target.value})}
+                    onChange={e => setNewExpense({ ...newExpense, description: e.target.value })}
                   />
                 </div>
                 <div className="grid gap-2">
                   <Label htmlFor="date">{t('expenses.date')}</Label>
-                  <Input 
-                    id="date" 
+                  <Input
+                    id="date"
                     type="date"
                     value={newExpense.date}
-                    onChange={e => setNewExpense({...newExpense, date: e.target.value})}
+                    onChange={e => setNewExpense({ ...newExpense, date: e.target.value })}
                   />
-                </div>
-                <div className="grid gap-2">
-                  <Label>{t('expenses.receiptUpload')}</Label>
-                  <div className="border-2 border-dashed border-border rounded-lg p-4 text-center hover:border-muted-foreground/50 transition-colors cursor-pointer">
-                    <Upload className="w-6 h-6 mx-auto text-muted-foreground mb-2" />
-                    <p className="text-xs text-muted-foreground">{t('expenses.uploadClick')}</p>
-                    <input type="file" className="hidden" />
-                  </div>
                 </div>
               </div>
               <DialogFooter>
                 <Button variant="outline" onClick={() => setIsAddOpen(false)}>{t('expenses.cancel')}</Button>
-                <Button onClick={handleAddExpense}>{t('expenses.save')}</Button>
+                <Button onClick={handleAddExpense} disabled={saving}>
+                  {saving && <Loader2 className="w-4 h-4 animate-spin mr-2" />}
+                  {t('expenses.save')}
+                </Button>
               </DialogFooter>
             </DialogContent>
           </Dialog>
@@ -163,7 +168,9 @@ export default function ExpensesManagement() {
             <CardTitle className="text-sm font-medium text-muted-foreground">{t('expenses.stats.total')}</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-foreground">${totalExpenses.toFixed(2)}</div>
+            <div className="text-2xl font-bold text-foreground">
+              {loading ? '—' : `RM ${totalExpenses.toFixed(2)}`}
+            </div>
           </CardContent>
         </Card>
         <Card className="border-border shadow-sm">
@@ -172,7 +179,7 @@ export default function ExpensesManagement() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-foreground">
-              ${expenses.filter(e => e.type === 'inventory').reduce((sum, e) => sum + e.amount, 0).toFixed(2)}
+              {loading ? '—' : `RM ${expenses.filter(e => e.type === 'inventory').reduce((s, e) => s + parseFloat(e.amount), 0).toFixed(2)}`}
             </div>
           </CardContent>
         </Card>
@@ -182,7 +189,7 @@ export default function ExpensesManagement() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-foreground">
-              ${expenses.filter(e => e.type === 'salary').reduce((sum, e) => sum + e.amount, 0).toFixed(2)}
+              {loading ? '—' : `RM ${expenses.filter(e => e.type === 'salary').reduce((s, e) => s + parseFloat(e.amount), 0).toFixed(2)}`}
             </div>
           </CardContent>
         </Card>
@@ -201,7 +208,13 @@ export default function ExpensesManagement() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {filteredExpenses.length === 0 ? (
+            {loading ? (
+              <TableRow>
+                <TableCell colSpan={6} className="h-32 text-center text-muted-foreground">
+                  <Loader2 className="w-5 h-5 animate-spin mx-auto" />
+                </TableCell>
+              </TableRow>
+            ) : filteredExpenses.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={6} className="h-32 text-center text-muted-foreground">
                   {t('expenses.noExpenses')}
@@ -217,8 +230,8 @@ export default function ExpensesManagement() {
                     </Badge>
                   </TableCell>
                   <TableCell className="font-medium text-foreground">{expense.description}</TableCell>
-                  <TableCell className="font-bold text-red-600">-${expense.amount.toFixed(2)}</TableCell>
-                  <TableCell className="text-muted-foreground text-xs">{expense.recordedBy}</TableCell>
+                  <TableCell className="font-bold text-red-600">-RM {parseFloat(expense.amount).toFixed(2)}</TableCell>
+                  <TableCell className="text-muted-foreground text-xs">{expense.recorded_by.name}</TableCell>
                   <TableCell className="text-right">
                     <Button variant="ghost" size="icon" className="h-8 w-8">
                       <FileText className="w-4 h-4" />

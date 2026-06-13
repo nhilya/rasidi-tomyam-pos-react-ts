@@ -7,6 +7,7 @@ import { Printer, Download, Plus, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
 import { getTables, createTable, deleteTable } from '@/api/tables';
+import { ApiError } from '@/lib/api';
 import type { ApiTable } from '@/api/types';
 
 export default function QRGenerator() {
@@ -31,8 +32,8 @@ export default function QRGenerator() {
       const table = await createTable(num);
       setTables(prev => [...prev, table].sort((a, b) => a.number.localeCompare(b.number)));
       setNewTableNumber('');
-    } catch {
-      toast.error('Failed to create table');
+    } catch (err) {
+      toast.error(err instanceof ApiError ? err.message : 'Failed to create table');
     } finally {
       setCreating(false);
     }
