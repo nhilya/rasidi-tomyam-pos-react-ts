@@ -10,7 +10,8 @@ import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import ThemeToggle from "../Layout/ThemeToggle";
 import Receipt from "../Finance/Receipt";
-import { getMenu } from "@/api/menu";
+import { getMenu, getCategories } from "@/api/menu";
+import type { ApiCategory } from "@/api/types";
 import { getTables } from "@/api/tables";
 import { createOrder } from "@/api/orders";
 
@@ -23,8 +24,9 @@ export default function StaffOrdering() {
   const [menuLoading, setMenuLoading] = React.useState(true);
   const [tablesLoading, setTablesLoading] = React.useState(true);
 
+  const [categories, setCategories] = React.useState<ApiCategory[]>([]);
   const [cart, setCart] = React.useState<{ [key: string]: number }>({});
-  const [category, setCategory] = React.useState<"all" | "food" | "drink">("all");
+  const [categoryId, setCategoryId] = React.useState<number | null>(null);
   const [step, setStep] = React.useState<"table" | "menu" | "checkout" | "success">("table");
   const [selectedTable, setSelectedTable] = React.useState<ApiTable | null>(null);
   const [lastOrder, setLastOrder] = React.useState<ApiOrder | null>(null);
@@ -32,8 +34,8 @@ export default function StaffOrdering() {
   const [placing, setPlacing] = React.useState(false);
 
   React.useEffect(() => {
-    getMenu()
-      .then(res => setApiMenu(res.data))
+    Promise.all([getMenu(), getCategories().catch(() => [])])
+      .then(([menuRes, cats]) => { setApiMenu(menuRes.data); setCategories(cats); })
       .catch(() => toast.error("Failed to load menu"))
       .finally(() => setMenuLoading(false));
     getTables()
@@ -63,7 +65,7 @@ export default function StaffOrdering() {
 
   const filteredMenu = apiMenu.filter(
     (item) =>
-      (category === "all" || item.category === category) &&
+      (categoryId === null || item.category.id === categoryId) &&
       item.name.toLowerCase().includes(searchTerm.toLowerCase()),
   );
 
@@ -256,14 +258,21 @@ export default function StaffOrdering() {
       </div>
 
       <div className="flex gap-2 mb-6 overflow-x-auto pb-2 scrollbar-hide">
-        {["all", "food", "drink"].map((cat) => (
+        <Button
+          variant={categoryId === null ? "default" : "outline"}
+          className="rounded-full h-9"
+          onClick={() => setCategoryId(null)}
+        >
+          {t("categories.all")}
+        </Button>
+        {categories.map((cat) => (
           <Button
-            key={cat}
-            variant={category === cat ? "default" : "outline"}
-            className="rounded-full capitalize h-9"
-            onClick={() => setCategory(cat as "all" | "food" | "drink")}
+            key={cat.id}
+            variant={categoryId === cat.id ? "default" : "outline"}
+            className="rounded-full h-9"
+            onClick={() => setCategoryId(cat.id)}
           >
-            {t(`categories.${cat}`)}
+            {cat.name}
           </Button>
         ))}
       </div>

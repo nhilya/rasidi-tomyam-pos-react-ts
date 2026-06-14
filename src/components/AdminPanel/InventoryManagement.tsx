@@ -6,20 +6,20 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from '@/components/ui/dialog';
-import { Plus, Search, Loader2 } from 'lucide-react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import { Plus, Search, Loader2, Trash2, Tag } from 'lucide-react';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '@/lib/auth';
-import { getMenu, createMenuItem, updateMenuItem } from '@/api/menu';
+import { getMenu, createMenuItem, updateMenuItem, getCategories, createCategory, deleteCategory } from '@/api/menu';
 import { ApiError } from '@/lib/api';
-import type { ApiMenuItem } from '@/api/types';
+import type { ApiMenuItem, ApiCategory } from '@/api/types';
 
 const EMPTY_FORM = {
   name: '',
   description: '',
   price: '',
-  category: 'food' as 'food' | 'drink',
+  menu_category_id: 0,
   stock: '',
   min_stock: '',
 };
@@ -28,15 +28,28 @@ export default function InventoryManagement() {
   const { t } = useTranslation();
   const { can } = useAuth();
   const [menu, setMenu] = React.useState<ApiMenuItem[]>([]);
+  const [categories, setCategories] = React.useState<ApiCategory[]>([]);
   const [loading, setLoading] = React.useState(true);
   const [saving, setSaving] = React.useState(false);
   const [searchTerm, setSearchTerm] = React.useState('');
   const [isAddOpen, setIsAddOpen] = React.useState(false);
   const [form, setForm] = React.useState(EMPTY_FORM);
+  const [isCatOpen, setIsCatOpen] = React.useState(false);
+  const [newCatName, setNewCatName] = React.useState('');
+  const [catSaving, setCatSaving] = React.useState(false);
 
   React.useEffect(() => {
-    getMenu()
-      .then(res => setMenu(res.data))
+    Promise.all([
+      getMenu(),
+      getCategories().catch(() => [] as ApiCategory[]),
+    ])
+      .then(([menuRes, cats]) => {
+        setMenu(menuRes.data);
+        setCategories(cats);
+        if (cats.length > 0) {
+          setForm(f => ({ ...f, menu_category_id: cats[0].id }));
+        }
+      })
       .catch(() => toast.error('Failed to load inventory'))
       .finally(() => setLoading(false));
   }, []);
@@ -69,7 +82,7 @@ export default function InventoryManagement() {
         name: form.name,
         description: form.description || undefined,
         price: parseFloat(form.price),
-        category: form.category,
+        menu_category_id: form.menu_category_id,
         stock: parseInt(form.stock),
         min_stock: parseInt(form.min_stock),
       });
@@ -81,6 +94,31 @@ export default function InventoryManagement() {
       toast.error(err instanceof ApiError ? err.message : 'Failed to add item');
     } finally {
       setSaving(false);
+    }
+  };
+
+  const handleAddCategory = async () => {
+    if (!newCatName.trim()) return;
+    setCatSaving(true);
+    try {
+      const cat = await createCategory({ name: newCatName.trim() });
+      setCategories(prev => [...prev, cat]);
+      setNewCatName('');
+      toast.success('Category added.');
+    } catch (err) {
+      toast.error(err instanceof ApiError ? err.message : 'Failed to add category');
+    } finally {
+      setCatSaving(false);
+    }
+  };
+
+  const handleDeleteCategory = async (id: number) => {
+    try {
+      await deleteCategory(id);
+      setCategories(prev => prev.filter(c => c.id !== id));
+      toast.success('Category deleted.');
+    } catch (err) {
+      toast.error(err instanceof ApiError ? err.message : 'Cannot delete — category may have items');
     }
   };
 
@@ -101,6 +139,12 @@ export default function InventoryManagement() {
               onChange={(e) => setSearchTerm(e.target.value)}
             />
           </div>
+          {can('create-menu') && (
+            <Button variant="outline" onClick={() => setIsCatOpen(true)}>
+              <Tag className="w-4 h-4 mr-2" />
+              Categories
+            </Button>
+          )}
           {can('create-menu') && (
             <Button variant="default" onClick={() => { setForm(EMPTY_FORM); setIsAddOpen(true); }}>
               <Plus className="w-4 h-4 mr-2" />
@@ -144,15 +188,16 @@ export default function InventoryManagement() {
                   <div className="grid gap-2">
                     <Label>{t('inventory.form.category')}</Label>
                     <Select
-                      value={form.category}
-                      onValueChange={v => setForm({ ...form, category: v as 'food' | 'drink' })}
+                      value={String(form.menu_category_id)}
+                      onValueChange={v => setForm({ ...form, menu_category_id: Number(v) })}
                     >
                       <SelectTrigger>
-                        <SelectValue />
+                        <SelectValue placeholder="Select category" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="food">{t('categories.food')}</SelectItem>
-                        <SelectItem value="drink">{t('categories.drink')}</SelectItem>
+                        {categories.map(cat => (
+                          <SelectItem key={cat.id} value={String(cat.id)}>{cat.name}</SelectItem>
+                        ))}
                       </SelectContent>
                     </Select>
                   </div>
@@ -182,11 +227,11 @@ export default function InventoryManagement() {
               </div>
               <DialogFooter>
                 <Button variant="outline" onClick={() => setIsAddOpen(false)}>
-                  {t('expenses.cancel')}
+                  {t('inventory.form.cancel')}
                 </Button>
                 <Button onClick={handleAddItem} disabled={saving}>
                   {saving && <Loader2 className="w-4 h-4 animate-spin mr-2" />}
-                  {t('expenses.save')}
+                  {t('inventory.form.save')}
                 </Button>
               </DialogFooter>
             </DialogContent>
@@ -248,7 +293,7 @@ export default function InventoryManagement() {
               filteredItems.map((item) => (
                 <TableRow key={item.id}>
                   <TableCell className="font-medium">{item.name}</TableCell>
-                  <TableCell className="capitalize">{item.category}</TableCell>
+                  <TableCell className="capitalize">{item.category.name}</TableCell>
                   <TableCell>
                     <span className={item.is_low_stock ? 'text-red-600 font-bold' : ''}>
                       {t('inventory.units', { count: item.stock })}
@@ -281,6 +326,50 @@ export default function InventoryManagement() {
           </TableBody>
         </Table>
       </Card>
+
+      {/* Category management dialog */}
+      <Dialog open={isCatOpen} onOpenChange={setIsCatOpen}>
+        <DialogContent className="sm:max-w-[380px]">
+          <DialogHeader>
+            <DialogTitle>Manage Categories</DialogTitle>
+          </DialogHeader>
+          <div className="grid gap-4 py-2">
+            <div className="flex gap-2">
+              <Input
+                placeholder="New category name"
+                value={newCatName}
+                onChange={e => setNewCatName(e.target.value)}
+                onKeyDown={e => e.key === 'Enter' && handleAddCategory()}
+              />
+              <Button onClick={handleAddCategory} disabled={catSaving || !newCatName.trim()}>
+                {catSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4" />}
+              </Button>
+            </div>
+            <div className="grid gap-1">
+              {categories.length === 0 ? (
+                <p className="text-sm text-muted-foreground text-center py-4">No categories yet.</p>
+              ) : (
+                categories.map(cat => (
+                  <div key={cat.id} className="flex items-center justify-between px-3 py-2 rounded-md border border-border">
+                    <span className="text-sm font-medium text-foreground">{cat.name}</span>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-7 w-7 text-muted-foreground hover:text-destructive"
+                      onClick={() => handleDeleteCategory(cat.id)}
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </Button>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsCatOpen(false)}>Close</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

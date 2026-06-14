@@ -2,7 +2,8 @@ import React from 'react';
 import { useStore } from '@/store';
 import type { ApiMenuItem, ApiOrder, ApiTable } from '@/api/types';
 import { resolveTable } from '@/api/tables';
-import { getMenu } from '@/api/menu';
+import { getMenu, getCategories } from '@/api/menu';
+import type { ApiCategory } from '@/api/types';
 import { createOrder } from '@/api/orders';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -21,9 +22,10 @@ export default function CustomerMenu() {
   const { user } = useStore();
 
   const [apiMenu, setApiMenu] = React.useState<ApiMenuItem[]>([]);
+  const [categories, setCategories] = React.useState<ApiCategory[]>([]);
   const [menuLoading, setMenuLoading] = React.useState(true);
   const [cart, setCart] = React.useState<{ [key: number]: number }>({});
-  const [category, setCategory] = React.useState<'all' | 'food' | 'drink'>('all');
+  const [categoryId, setCategoryId] = React.useState<number | null>(null);
   const [step, setStep] = React.useState<'menu' | 'checkout' | 'success'>('menu');
   const [lastOrder, setLastOrder] = React.useState<ApiOrder | null>(null);
   const [tableInfo, setTableInfo] = React.useState<ApiTable | null>(null);
@@ -39,8 +41,11 @@ export default function CustomerMenu() {
   const qrToken = new URLSearchParams(window.location.search).get('token');
 
   React.useEffect(() => {
-    getMenu()
-      .then(res => setApiMenu(res.data))
+    Promise.all([getMenu(), getCategories().catch(() => [])])
+      .then(([menuRes, cats]) => {
+        setApiMenu(menuRes.data);
+        setCategories(cats);
+      })
       .catch(() => toast.error('Failed to load menu'))
       .finally(() => setMenuLoading(false));
 
@@ -69,7 +74,7 @@ export default function CustomerMenu() {
     return sum + (item ? parseFloat(item.price) : 0) * qty;
   }, 0);
 
-  const filteredMenu = apiMenu.filter(item => category === 'all' || item.category === category);
+  const filteredMenu = apiMenu.filter(item => categoryId === null || item.category.id === categoryId);
 
   const handlePlaceOrder = async () => {
     if (!customerInfo.name || !customerInfo.email || !customerInfo.phone) {
@@ -228,14 +233,21 @@ export default function CustomerMenu() {
       </div>
 
       <div className="flex gap-2 mb-8 overflow-x-auto pb-2 scrollbar-hide">
-        {['all', 'food', 'drink'].map((cat) => (
+        <Button
+          variant={categoryId === null ? 'default' : 'outline'}
+          className="rounded-full"
+          onClick={() => setCategoryId(null)}
+        >
+          {t('categories.all')}
+        </Button>
+        {categories.map(cat => (
           <Button
-            key={cat}
-            variant={category === cat ? 'default' : 'outline'}
-            className="rounded-full capitalize"
-            onClick={() => setCategory(cat as 'all' | 'food' | 'drink')}
+            key={cat.id}
+            variant={categoryId === cat.id ? 'default' : 'outline'}
+            className="rounded-full"
+            onClick={() => setCategoryId(cat.id)}
           >
-            {t(`categories.${cat}`)}
+            {cat.name}
           </Button>
         ))}
       </div>

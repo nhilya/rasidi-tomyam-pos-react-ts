@@ -53,6 +53,7 @@ export default function Login() {
         role: (user.roles[0] as Role) ?? 'staff',
         phone: user.phone ?? undefined,
         permissions: user.permissions ?? [],
+        must_change_password: user.must_change_password,
       });
     } catch {
       toast.error('Invalid credentials');

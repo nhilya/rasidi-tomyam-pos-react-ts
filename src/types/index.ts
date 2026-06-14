@@ -7,6 +7,7 @@ export interface User {
   role: Role | 'customer';
   phone?: string | null;
   permissions: string[];
+  must_change_password?: boolean;
 }
 
 export interface Customer {

@@ -39,6 +39,8 @@ import {
   Eye,
   EyeOff,
   RotateCcw,
+  Copy,
+  Check,
 } from "lucide-react";
 import { toast } from "sonner";
 import { useTranslation } from "react-i18next";
@@ -65,6 +67,7 @@ const ROLE_COLORS: Record<string, string> = {
 };
 
 const EMPTY_FORM = { name: "", phone: "", password: "", role: "staff" };
+// password only used for edit (optional reset); create uses auto-generated temp password
 
 interface StaffTableProps {
   members: ApiUser[];
@@ -216,6 +219,7 @@ export default function StaffManagement() {
   const [pastStaff, setPastStaff] = React.useState<ApiUser[]>([]);
   const [loadingPast, setLoadingPast] = React.useState(false);
   const [availableRoles, setAvailableRoles] = React.useState<string[]>([]);
+  const [tempPassword, setTempPassword] = React.useState<string | null>(null);
   const [availablePermissions, setAvailablePermissions] = React.useState<
     string[]
   >([]);
@@ -313,10 +317,6 @@ export default function StaffManagement() {
       toast.error(t("staff.fillRequired"));
       return;
     }
-    if (!editingStaff && !form.password) {
-      toast.error(t("staff.fillRequired"));
-      return;
-    }
     const isGranularRole = form.role === "staff";
     setSaving(true);
     try {
@@ -335,16 +335,18 @@ export default function StaffManagement() {
           prev.map((s) => (s.id === updated.id ? updated : s)),
         );
       } else {
-        const created = await createStaff({
+        const { staff: created, temporary_password } = await createStaff({
           name: form.name,
           phone: form.phone,
-          password: form.password,
           role: form.role,
         });
         if (isGranularRole) {
           await assignPermissions(created.id, selectedPermissions);
         }
         setStaff((prev) => [...prev, created]);
+        setIsDialogOpen(false);
+        setTempPassword(temporary_password);
+        return;
       }
       toast.success(t("staff.saveSuccess"));
       setIsDialogOpen(false);
@@ -451,38 +453,38 @@ export default function StaffManagement() {
                     }
                   />
                 </div>
-                <div className="grid gap-2">
-                  <Label>
-                    {t("staff.password")}
-                    {editingStaff && (
+                {editingStaff && (
+                  <div className="grid gap-2">
+                    <Label>
+                      {t("staff.password")}
                       <span className="text-xs text-muted-foreground ml-2">
                         ({t("staff.passwordHint")})
                       </span>
-                    )}
-                  </Label>
-                  <div className="relative">
-                    <Input
-                      type={showPassword ? "text" : "password"}
-                      placeholder="••••••••"
-                      className="pr-10"
-                      value={form.password}
-                      onChange={(e) =>
-                        setForm({ ...form, password: e.target.value })
-                      }
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowPassword((v) => !v)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
-                    >
-                      {showPassword ? (
-                        <EyeOff className="w-4 h-4" />
-                      ) : (
-                        <Eye className="w-4 h-4" />
-                      )}
-                    </button>
+                    </Label>
+                    <div className="relative">
+                      <Input
+                        type={showPassword ? "text" : "password"}
+                        placeholder="••••••••"
+                        className="pr-10"
+                        value={form.password}
+                        onChange={(e) =>
+                          setForm({ ...form, password: e.target.value })
+                        }
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword((v) => !v)}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                      >
+                        {showPassword ? (
+                          <EyeOff className="w-4 h-4" />
+                        ) : (
+                          <Eye className="w-4 h-4" />
+                        )}
+                      </button>
+                    </div>
                   </div>
-                </div>
+                )}
                 <div className="grid gap-2">
                   <Label>{t("staff.role")}</Label>
                   <Select
@@ -674,6 +676,41 @@ export default function StaffManagement() {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Temp password — shown once after staff creation */}
+      <Dialog open={tempPassword !== null} onOpenChange={open => { if (!open) setTempPassword(null); }}>
+        <DialogContent className="sm:max-w-[380px]">
+          <DialogHeader>
+            <DialogTitle>{t("staff.tempPasswordTitle", { defaultValue: "Staff Created" })}</DialogTitle>
+          </DialogHeader>
+          <div className="grid gap-4 py-2">
+            <p className="text-sm text-muted-foreground">
+              {t("staff.tempPasswordHint", { defaultValue: "Share this temporary password with the staff member. It will not be shown again." })}
+            </p>
+            <TempPasswordDisplay password={tempPassword ?? ""} />
+          </div>
+          <DialogFooter>
+            <Button onClick={() => setTempPassword(null)}>Done</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+}
+
+function TempPasswordDisplay({ password }: { password: string }) {
+  const [copied, setCopied] = React.useState(false);
+  const copy = () => {
+    navigator.clipboard.writeText(password);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+  return (
+    <div className="flex items-center gap-2 bg-muted rounded-lg px-3 py-2">
+      <code className="flex-1 text-sm font-mono font-bold text-foreground tracking-wider">{password}</code>
+      <Button variant="ghost" size="icon" className="h-7 w-7 shrink-0" onClick={copy}>
+        {copied ? <Check className="w-4 h-4 text-green-500" /> : <Copy className="w-4 h-4" />}
+      </Button>
     </div>
   );
 }

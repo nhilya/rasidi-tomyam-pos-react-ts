@@ -6,8 +6,12 @@ export type StaffRole = 'super_admin' | 'boss' | 'staff';
 export interface CreateStaffPayload {
   name: string;
   phone: string;
-  password: string;
   role: string;
+}
+
+export interface CreateStaffResponse {
+  staff: ApiUser;
+  temporary_password: string;
 }
 
 export interface UpdateStaffPayload {
@@ -47,7 +51,7 @@ export async function assignPermissions(id: number, permissions: string[]): Prom
   });
 }
 
-export async function createStaff(payload: CreateStaffPayload): Promise<ApiUser> {
+export async function createStaff(payload: CreateStaffPayload): Promise<CreateStaffResponse> {
   return apiFetch('/staff', {
     method: 'POST',
     body: JSON.stringify(payload),

@@ -171,6 +171,8 @@ const resources = {
           category: "Category",
           stock: "Initial Stock",
           minStock: "Min. Stock Alert",
+          save: "Save",
+          cancel: "Cancel",
         },
       },
       expenses: {
@@ -472,6 +474,8 @@ const resources = {
           category: "Kategori",
           stock: "Stok Awal",
           minStock: "Had Stok Minimum",
+          save: "Simpan",
+          cancel: "Batal",
         },
       },
       expenses: {
@@ -772,6 +776,8 @@ const resources = {
           category: "หมวดหมู่",
           stock: "สต็อกเริ่มต้น",
           minStock: "สต็อกขั้นต่ำ",
+          save: "บันทึก",
+          cancel: "ยกเลิก",
         },
       },
       expenses: {

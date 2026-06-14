@@ -23,3 +23,16 @@ export async function getMe(): Promise<ApiUser> {
 export function logout(): void {
   clearToken();
 }
+
+export interface ChangePasswordPayload {
+  current_password: string;
+  password: string;
+  password_confirmation: string;
+}
+
+export async function changePassword(payload: ChangePasswordPayload): Promise<{ message: string }> {
+  return apiFetch('/auth/change-password', {
+    method: 'POST',
+    body: JSON.stringify(payload),
+  });
+}

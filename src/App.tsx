@@ -16,6 +16,7 @@ import QRGenerator from './components/AdminPanel/QrGenerator';
 import StaffOrdering from './components/AdminPanel/StaffOrdering';
 import StaffManagement from './components/AdminPanel/StaffManagement';
 import RolesManagement from './components/AdminPanel/RolesManagement';
+import ChangePasswordForced from './components/AdminPanel/ChangePassword';
 import { getToken, clearToken } from './lib/api';
 import { getMe } from './api/auth';
 
@@ -45,6 +46,7 @@ export default function App() {
           role: (apiUser.roles[0] as Role),
           phone: apiUser.phone ?? undefined,
           permissions: apiUser.permissions ?? [],
+          must_change_password: apiUser.must_change_password,
         });
       })
       .catch(() => {
@@ -65,6 +67,7 @@ export default function App() {
 
   return (
     <ThemeProvider defaultTheme="system" enableSystem>
+      {user?.must_change_password && <ChangePasswordForced />}
       <Router>
         <Routes>
           {/* Public Customer View */}

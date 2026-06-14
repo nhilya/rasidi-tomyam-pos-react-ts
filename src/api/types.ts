@@ -21,8 +21,14 @@ export interface ApiUser {
   phone: string | null;
   roles: string[];
   permissions: string[];
+  must_change_password: boolean;
   created_at: string;
   deleted_at?: string | null;
+}
+
+export interface ApiCategory {
+  id: number;
+  name: string;
 }
 
 export interface ApiMenuItem {
@@ -30,7 +36,7 @@ export interface ApiMenuItem {
   name: string;
   description: string | null;
   price: string;
-  category: 'food' | 'drink';
+  category: ApiCategory;
   image_url: string | null;
   stock: number;
   min_stock: number;
