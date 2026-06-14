@@ -10,6 +10,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, Dialog
 import { Plus, Search, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
+import { useAuth } from '@/lib/auth';
 import { getMenu, createMenuItem, updateMenuItem } from '@/api/menu';
 import { ApiError } from '@/lib/api';
 import type { ApiMenuItem } from '@/api/types';
@@ -25,6 +26,7 @@ const EMPTY_FORM = {
 
 export default function InventoryManagement() {
   const { t } = useTranslation();
+  const { can } = useAuth();
   const [menu, setMenu] = React.useState<ApiMenuItem[]>([]);
   const [loading, setLoading] = React.useState(true);
   const [saving, setSaving] = React.useState(false);
@@ -99,15 +101,13 @@ export default function InventoryManagement() {
               onChange={(e) => setSearchTerm(e.target.value)}
             />
           </div>
+          {can('create-menu') && (
+            <Button variant="default" onClick={() => { setForm(EMPTY_FORM); setIsAddOpen(true); }}>
+              <Plus className="w-4 h-4 mr-2" />
+              {t('inventory.addItem')}
+            </Button>
+          )}
           <Dialog open={isAddOpen} onOpenChange={setIsAddOpen}>
-            <DialogTrigger
-              render={
-                <Button variant="default" onClick={() => { setForm(EMPTY_FORM); setIsAddOpen(true); }}>
-                  <Plus className="w-4 h-4 mr-2" />
-                  {t('inventory.addItem')}
-                </Button>
-              }
-            />
             <DialogContent className="sm:max-w-[425px]">
               <DialogHeader>
                 <DialogTitle>{t('inventory.newItem')}</DialogTitle>

@@ -5,21 +5,25 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
-import { Plus, Search, FileText, Loader2 } from 'lucide-react';
+import { Plus, Search, FileText, Loader2, Upload, X } from 'lucide-react';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
+import { useAuth } from '@/lib/auth';
 import { getExpenses, createExpense } from '@/api/expenses';
 import type { ApiExpense } from '@/api/types';
 
 export default function ExpensesManagement() {
   const { t } = useTranslation();
+  const { can, hasRole } = useAuth();
+  const isStaff = hasRole('staff');
   const [expenses, setExpenses] = React.useState<ApiExpense[]>([]);
   const [loading, setLoading] = React.useState(true);
   const [saving, setSaving] = React.useState(false);
   const [searchTerm, setSearchTerm] = React.useState('');
   const [isAddOpen, setIsAddOpen] = React.useState(false);
+  const [receiptFile, setReceiptFile] = React.useState<File | null>(null);
 
   const [newExpense, setNewExpense] = React.useState({
     type: 'inventory' as ApiExpense['type'],
@@ -47,14 +51,17 @@ export default function ExpensesManagement() {
     }
     setSaving(true);
     try {
-      const created = await createExpense({
-        type: newExpense.type,
-        amount: parseFloat(newExpense.amount),
-        description: newExpense.description,
-        date: newExpense.date,
-      });
+      const fd = new FormData();
+      fd.append('type', newExpense.type);
+      fd.append('amount', parseFloat(newExpense.amount).toString());
+      fd.append('description', newExpense.description);
+      fd.append('date', newExpense.date);
+      if (receiptFile) fd.append('receipt', receiptFile);
+
+      const created = await createExpense(fd);
       setExpenses(prev => [created, ...prev]);
       setIsAddOpen(false);
+      setReceiptFile(null);
       setNewExpense({
         type: 'inventory',
         amount: '',
@@ -88,79 +95,108 @@ export default function ExpensesManagement() {
               onChange={(e) => setSearchTerm(e.target.value)}
             />
           </div>
-
-          <Dialog open={isAddOpen} onOpenChange={setIsAddOpen}>
-            <DialogTrigger
-              render={
-                <Button variant="default">
-                  <Plus className="w-4 h-4 mr-2" />
-                  {t('expenses.record')}
-                </Button>
-              }
-            />
-            <DialogContent className="sm:max-w-[425px]">
-              <DialogHeader>
-                <DialogTitle>{t('expenses.newExpense')}</DialogTitle>
-                <CardDescription>{t('expenses.expenseDesc')}</CardDescription>
-              </DialogHeader>
-              <div className="grid gap-4 py-4">
-                <div className="grid gap-2">
-                  <Label htmlFor="type">{t('expenses.type')}</Label>
-                  <Select
-                    value={newExpense.type}
-                    onValueChange={(v) => setNewExpense({ ...newExpense, type: v as ApiExpense['type'] })}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder={t('expenses.selectType')} />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="salary">{t('expenses.types.salary')}</SelectItem>
-                      <SelectItem value="inventory">{t('expenses.types.inventory')}</SelectItem>
-                      <SelectItem value="utility">{t('expenses.types.utility')}</SelectItem>
-                      <SelectItem value="other">{t('expenses.types.other')}</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="grid gap-2">
-                  <Label htmlFor="amount">{t('expenses.amount')}</Label>
-                  <Input
-                    id="amount"
-                    type="number"
-                    placeholder="0.00"
-                    value={newExpense.amount}
-                    onChange={e => setNewExpense({ ...newExpense, amount: e.target.value })}
-                  />
-                </div>
-                <div className="grid gap-2">
-                  <Label htmlFor="description">{t('expenses.description')}</Label>
-                  <Input
-                    id="description"
-                    placeholder={t('expenses.descPlaceholder')}
-                    value={newExpense.description}
-                    onChange={e => setNewExpense({ ...newExpense, description: e.target.value })}
-                  />
-                </div>
-                <div className="grid gap-2">
-                  <Label htmlFor="date">{t('expenses.date')}</Label>
-                  <Input
-                    id="date"
-                    type="date"
-                    value={newExpense.date}
-                    onChange={e => setNewExpense({ ...newExpense, date: e.target.value })}
-                  />
-                </div>
-              </div>
-              <DialogFooter>
-                <Button variant="outline" onClick={() => setIsAddOpen(false)}>{t('expenses.cancel')}</Button>
-                <Button onClick={handleAddExpense} disabled={saving}>
-                  {saving && <Loader2 className="w-4 h-4 animate-spin mr-2" />}
-                  {t('expenses.save')}
-                </Button>
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
+          {can('create-expenses') && (
+            <Button variant="default" onClick={() => setIsAddOpen(true)}>
+              <Plus className="w-4 h-4 mr-2" />
+              {t('expenses.record')}
+            </Button>
+          )}
         </div>
       </div>
+
+      {/* Record Expense Dialog — rendered outside header, state-controlled */}
+      <Dialog open={isAddOpen} onOpenChange={setIsAddOpen}>
+        <DialogContent className="sm:max-w-[425px] max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>{t('expenses.newExpense')}</DialogTitle>
+            <CardDescription>{t('expenses.expenseDesc')}</CardDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid gap-2">
+              <Label htmlFor="type">{t('expenses.type')}</Label>
+              <Select
+                value={newExpense.type}
+                onValueChange={(v) => setNewExpense({ ...newExpense, type: v as ApiExpense['type'] })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder={t('expenses.selectType')} />
+                </SelectTrigger>
+                <SelectContent>
+                  {!isStaff && <SelectItem value="salary">{t('expenses.types.salary')}</SelectItem>}
+                  <SelectItem value="inventory">{t('expenses.types.inventory')}</SelectItem>
+                  <SelectItem value="utility">{t('expenses.types.utility')}</SelectItem>
+                  <SelectItem value="other">{t('expenses.types.other')}</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="amount">{t('expenses.amount')}</Label>
+              <Input
+                id="amount"
+                type="number"
+                placeholder="0.00"
+                value={newExpense.amount}
+                onChange={e => setNewExpense({ ...newExpense, amount: e.target.value })}
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="description">{t('expenses.description')}</Label>
+              <Input
+                id="description"
+                placeholder={t('expenses.descPlaceholder')}
+                value={newExpense.description}
+                onChange={e => setNewExpense({ ...newExpense, description: e.target.value })}
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="date">{t('expenses.date')}</Label>
+              <Input
+                id="date"
+                type="date"
+                value={newExpense.date}
+                onChange={e => setNewExpense({ ...newExpense, date: e.target.value })}
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label>
+                {t('expenses.receiptUpload')}
+                <span className="text-muted-foreground text-xs ml-1">(Optional)</span>
+              </Label>
+              {receiptFile ? (
+                <div className="flex items-center gap-2 border rounded-md px-3 py-2 text-sm text-foreground">
+                  <FileText className="w-4 h-4 text-muted-foreground shrink-0" />
+                  <span className="flex-1 truncate">{receiptFile.name}</span>
+                  <button
+                    type="button"
+                    onClick={() => setReceiptFile(null)}
+                    className="text-muted-foreground hover:text-destructive"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
+              ) : (
+                <label className="flex flex-col items-center gap-2 border-2 border-dashed border-border rounded-md px-4 py-6 cursor-pointer hover:border-primary hover:bg-muted/30 transition-colors">
+                  <Upload className="w-5 h-5 text-muted-foreground" />
+                  <span className="text-sm text-muted-foreground">{t('expenses.uploadClick')}</span>
+                  <input
+                    type="file"
+                    accept=".jpg,.jpeg,.png"
+                    className="hidden"
+                    onChange={e => setReceiptFile(e.target.files?.[0] ?? null)}
+                  />
+                </label>
+              )}
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsAddOpen(false)}>{t('expenses.cancel')}</Button>
+            <Button onClick={handleAddExpense} disabled={saving}>
+              {saving && <Loader2 className="w-4 h-4 animate-spin mr-2" />}
+              {t('expenses.save')}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <Card className="border-border shadow-sm">
@@ -233,9 +269,11 @@ export default function ExpensesManagement() {
                   <TableCell className="font-bold text-red-600">-RM {parseFloat(expense.amount).toFixed(2)}</TableCell>
                   <TableCell className="text-muted-foreground text-xs">{expense.recorded_by.name}</TableCell>
                   <TableCell className="text-right">
-                    <Button variant="ghost" size="icon" className="h-8 w-8">
-                      <FileText className="w-4 h-4" />
-                    </Button>
+                    {can('delete-expenses') && (
+                      <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-destructive">
+                        <FileText className="w-4 h-4" />
+                      </Button>
+                    )}
                   </TableCell>
                 </TableRow>
               ))

@@ -25,28 +25,10 @@ const QUICK_FILL = [
     role: 'boss'
   },
   {
-    label: 'MG',
-    phone: '0111000002',
-    color: 'bg-blue-600 text-white',
-    role: 'manager'
-  },
-  {
-    label: 'SP',
-    phone: '0111000003',
-    color: 'bg-purple-600 text-white',
-    role: 'supervisor'
-  },
-  {
-    label: 'CS',
+    label: 'ST',
     phone: '0111000004',
     color: 'bg-green-600 text-white',
-    role: 'cashier'
-  },
-  {
-    label: 'SV',
-    phone: '0111000005',
-    color: 'bg-amber-600 text-white',
-    role: 'server'
+    role: 'staff'
   },
 ] as const;
 
@@ -68,8 +50,9 @@ export default function Login() {
         id: String(user.id),
         name: user.name,
         email: user.email,
-        role: (user.roles[0] as Role) ?? 'cashier',
+        role: (user.roles[0] as Role) ?? 'staff',
         phone: user.phone ?? undefined,
+        permissions: user.permissions ?? [],
       });
     } catch {
       toast.error('Invalid credentials');

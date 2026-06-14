@@ -1,7 +1,7 @@
 import { apiFetch } from '@/lib/api';
 import type { ApiUser, PaginatedResponse } from './types';
 
-export type StaffRole = 'boss' | 'manager' | 'supervisor' | 'cashier' | 'server';
+export type StaffRole = 'super_admin' | 'boss' | 'staff';
 
 export interface CreateStaffPayload {
   name: string;
@@ -25,8 +25,26 @@ export async function getPastStaff(): Promise<PaginatedResponse<ApiUser>> {
   return apiFetch('/staff/past');
 }
 
-export async function getRoles(): Promise<string[]> {
+export interface ApiRole {
+  id: number;
+  name: string;
+  permissions: string[];
+  is_system: boolean;
+}
+
+export async function getRoles(): Promise<ApiRole[]> {
   return apiFetch('/roles');
+}
+
+export async function getPermissions(): Promise<Record<string, string[]>> {
+  return apiFetch('/permissions');
+}
+
+export async function assignPermissions(id: number, permissions: string[]): Promise<ApiUser> {
+  return apiFetch(`/staff/${id}/permissions`, {
+    method: 'PUT',
+    body: JSON.stringify({ permissions }),
+  });
 }
 
 export async function createStaff(payload: CreateStaffPayload): Promise<ApiUser> {
@@ -45,4 +63,31 @@ export async function updateStaff(id: number, payload: UpdateStaffPayload): Prom
 
 export async function deleteStaff(id: number): Promise<{ message: string }> {
   return apiFetch(`/staff/${id}`, { method: 'DELETE' });
+}
+
+export async function restoreStaff(id: number): Promise<ApiUser> {
+  return apiFetch(`/staff/${id}/restore`, { method: 'POST' });
+}
+
+export interface CreateRolePayload {
+  name: string;
+  permissions: string[];
+}
+
+export async function createRole(payload: CreateRolePayload): Promise<ApiRole> {
+  return apiFetch('/roles', {
+    method: 'POST',
+    body: JSON.stringify(payload),
+  });
+}
+
+export async function updateRole(id: number, payload: CreateRolePayload): Promise<ApiRole> {
+  return apiFetch(`/roles/${id}`, {
+    method: 'PUT',
+    body: JSON.stringify(payload),
+  });
+}
+
+export async function deleteRole(id: number): Promise<{ message: string }> {
+  return apiFetch(`/roles/${id}`, { method: 'DELETE' });
 }

@@ -34,8 +34,9 @@ export async function apiFetch<T>(
   path: string,
   { auth = true, ...options }: FetchOptions = {},
 ): Promise<T> {
+  const isFormData = options.body instanceof FormData;
   const headers: Record<string, string> = {
-    'Content-Type': 'application/json',
+    ...(isFormData ? {} : { 'Content-Type': 'application/json' }),
     Accept: 'application/json',
     ...(options.headers as Record<string, string>),
   };

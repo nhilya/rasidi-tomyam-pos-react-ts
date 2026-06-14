@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { LayoutDashboard, ClipboardList, Package, BarChart3, Users, LogOut, Menu as MenuIcon, X, DollarSign, ChevronLeft, ChevronRight, QrCode, UserCog } from 'lucide-react';
+import { LayoutDashboard, ClipboardList, Package, BarChart3, Users, LogOut, Menu as MenuIcon, X, DollarSign, ChevronLeft, ChevronRight, QrCode, UserCog, ShieldCheck } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useStore } from '@/store';
 import { cn } from '@/lib/utils';
@@ -22,17 +22,22 @@ export default function Layout({ children }: LayoutProps) {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = React.useState(false);
 
   const navigation = [
-    { name: t('nav.dashboard'), href: '/admin', icon: LayoutDashboard, roles: ['super_admin', 'boss', 'manager'] },
-    { name: t('nav.pos'), href: '/pos', icon: ClipboardList, roles: ['super_admin', 'boss', 'manager', 'cashier', 'server'] },
-    { name: t('nav.inventory'), href: '/inventory', icon: Package, roles: ['super_admin', 'boss', 'manager', 'supervisor'] },
-    { name: t('nav.expenses'), href: '/expenses', icon: DollarSign, roles: ['super_admin', 'boss', 'manager'] },
-    { name: t('nav.customers'), href: '/customers', icon: Users, roles: ['super_admin', 'boss', 'manager'] },
-    { name: t('nav.reports'), href: '/reports', icon: BarChart3, roles: ['super_admin', 'boss', 'manager'] },
-    { name: t('nav.staff'), href: '/staff', icon: UserCog, roles: ['super_admin', 'boss', 'manager'] },
+    { name: t('nav.dashboard'), href: '/admin', icon: LayoutDashboard, roles: ['super_admin', 'boss'] },
+    { name: t('nav.pos'), href: '/pos', icon: ClipboardList, roles: ['super_admin', 'boss', 'staff'] },
+    { name: t('nav.inventory'), href: '/inventory', icon: Package, roles: ['super_admin', 'boss'] },
+    { name: t('nav.expenses'), href: '/expenses', icon: DollarSign, roles: ['super_admin', 'boss'] },
+    { name: t('nav.customers'), href: '/customers', icon: Users, roles: ['super_admin', 'boss'] },
+    { name: t('nav.reports'), href: '/reports', icon: BarChart3, permission: 'view-reports' },
+    { name: t('nav.staff'), href: '/staff', icon: UserCog, permission: 'manage-staff' },
+    { name: t('nav.roles'), href: '/roles', icon: ShieldCheck, permission: 'manage-staff' },
     { name: t('nav.selfOrderQrTable'), href: '/self-order-qr', icon: QrCode, roles: ['super_admin', 'boss'] },
   ];
 
-  const filteredNav = navigation.filter(item => !item.roles || (user && item.roles.includes(user.role)));
+  const isSuperAdmin = user?.role === 'super_admin';
+  const filteredNav = navigation.filter(item => {
+    if (item.permission) return isSuperAdmin || (user?.permissions.includes(item.permission) ?? false);
+    return !item.roles || (user && item.roles.includes(user.role));
+  });
 
   // If it's a customer menu (QR code), we might want a different layout
   const isCustomerView = location.pathname.startsWith('/menu');

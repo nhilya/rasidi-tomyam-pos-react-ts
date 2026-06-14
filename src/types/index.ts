@@ -1,4 +1,4 @@
-export type Role = 'super_admin' | 'boss' | 'manager' | 'cashier' | 'supervisor' | 'server';
+export type Role = 'super_admin' | 'boss' | 'staff';
 
 export interface User {
   id: string;
@@ -6,6 +6,7 @@ export interface User {
   email?: string | null;
   role: Role | 'customer';
   phone?: string | null;
+  permissions: string[];
 }
 
 export interface Customer {

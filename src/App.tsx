@@ -15,8 +15,16 @@ import Reports from './components/Analytics/Reports';
 import QRGenerator from './components/AdminPanel/QrGenerator';
 import StaffOrdering from './components/AdminPanel/StaffOrdering';
 import StaffManagement from './components/AdminPanel/StaffManagement';
+import RolesManagement from './components/AdminPanel/RolesManagement';
 import { getToken, clearToken } from './lib/api';
 import { getMe } from './api/auth';
+
+function PermGuard({ permission, children }: { permission: string; children: React.ReactNode }) {
+  const { user } = useStore();
+  const isSuperAdmin = user?.role === 'super_admin';
+  if (!isSuperAdmin && !user?.permissions.includes(permission)) return <Navigate to="/" replace />;
+  return <>{children}</>;
+}
 
 export default function App() {
   const { user, setUser } = useStore();
@@ -34,8 +42,9 @@ export default function App() {
           id: String(apiUser.id),
           name: apiUser.name,
           email: apiUser.email,
-          role: (apiUser.roles[0] as Role) ?? 'cashier',
+          role: (apiUser.roles[0] as Role),
           phone: apiUser.phone ?? undefined,
+          permissions: apiUser.permissions ?? [],
         });
       })
       .catch(() => {
@@ -72,10 +81,11 @@ export default function App() {
               <Route path="/inventory" element={<Layout><InventoryManagement /></Layout>} />
               <Route path="/expenses" element={<Layout><ExpensesManagement /></Layout>} />
               <Route path="/customers" element={<Layout><CustomerManagement /></Layout>} />
-              <Route path="/reports" element={<Layout><Reports /></Layout>} />
+              <Route path="/reports" element={<PermGuard permission="view-reports"><Layout><Reports /></Layout></PermGuard>} />
               <Route path="/self-order-qr" element={<Layout><QRGenerator /></Layout>} />
-              <Route path="/staff" element={<Layout><StaffManagement /></Layout>} />
-              <Route path="/" element={<Navigate to={user.role === 'server' || user.role === 'cashier' ? '/pos' : '/admin'} replace />} />
+              <Route path="/staff" element={<PermGuard permission="manage-staff"><Layout><StaffManagement /></Layout></PermGuard>} />
+              <Route path="/roles" element={<PermGuard permission="manage-staff"><Layout><RolesManagement /></Layout></PermGuard>} />
+              <Route path="/" element={<Navigate to={user.role === 'staff' ? '/pos' : '/admin'} replace />} />
               <Route path="*" element={<Navigate to="/" replace />} />
             </>
           )}

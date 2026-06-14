@@ -20,7 +20,9 @@ export interface ApiUser {
   email: string | null;
   phone: string | null;
   roles: string[];
+  permissions: string[];
   created_at: string;
+  deleted_at?: string | null;
 }
 
 export interface ApiMenuItem {

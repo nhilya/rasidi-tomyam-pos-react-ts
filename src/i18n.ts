@@ -1,6 +1,6 @@
-import i18n from 'i18next';
-import { initReactI18next } from 'react-i18next';
-import LanguageDetector from 'i18next-browser-languagedetector';
+import i18n from "i18next";
+import { initReactI18next } from "react-i18next";
+import LanguageDetector from "i18next-browser-languagedetector";
 
 const resources = {
   en: {
@@ -10,7 +10,7 @@ const resources = {
       categories: {
         all: "All",
         food: "Food",
-        drink: "Drink"
+        drink: "Drink",
       },
       cart: {
         viewOrder: "View Order",
@@ -18,7 +18,7 @@ const resources = {
         total: "Total",
         placeOrder: "Place Order",
         summary: "Order Summary",
-        add: "Add"
+        add: "Add",
       },
       customerInfo: {
         title: "Customer Information",
@@ -26,13 +26,13 @@ const resources = {
         name: "Full Name",
         email: "Email Address",
         phone: "Phone Number",
-        error: "Please fill in your details for future communications."
+        error: "Please fill in your details for future communications.",
       },
       success: {
         title: "Order Received!",
         desc: "Your order is being prepared. You can view your receipt below.",
         back: "Back to Menu",
-        toast: "Order placed successfully!"
+        toast: "Order placed successfully!",
       },
       receipt: {
         title: "Receipt",
@@ -44,7 +44,7 @@ const resources = {
         subtotal: "Subtotal",
         discount: "Discount",
         total: "Total",
-        pending: "Pending"
+        pending: "Pending",
       },
       nav: {
         dashboard: "Dashboard",
@@ -55,10 +55,11 @@ const resources = {
         reports: "Reports",
         employees: "Employees",
         staff: "Staff",
+        roles: "Roles & Permissions",
         selfOrderQrTable: "Self Order (QR Table)",
         logout: "Logout",
         loginSoon: "Login feature coming soon!",
-        table: "Table {{number}}"
+        table: "Table {{number}}",
       },
       login: {
         title: "Rasidi Tomyam",
@@ -71,11 +72,8 @@ const resources = {
         roles: {
           boss: "Boss",
           super_admin: "Super Admin",
-          manager: "Manager",
-          supervisor: "Supervisor",
-          cashier: "Cashier",
-          server: "Server"
-        }
+          staff: "Staff",
+        },
       },
       dashboard: {
         welcome: "Welcome Back, Mom",
@@ -84,7 +82,7 @@ const resources = {
           todaySales: "Today's Sales",
           activeOrders: "Active Orders",
           lowStock: "Low Stock Items",
-          totalCustomers: "Total Customers"
+          totalCustomers: "Total Customers",
         },
         recentOrders: "Recent Orders",
         inventoryAlerts: "Inventory Alerts",
@@ -94,7 +92,7 @@ const resources = {
         allHealthy: "All stock levels are healthy.",
         onlyLeft: "Only {{count}} left",
         restock: "Restock",
-        table: "Table {{number}}"
+        table: "Table {{number}}",
       },
       pos: {
         title: "Orders & POS",
@@ -126,7 +124,8 @@ const resources = {
         summary: "Live Summary",
         revenue: "Today's Revenue",
         completedOrders: "From {{count}} completed orders",
-        syncSuccess: "Successfully synced {{count}} orders from external platforms.",
+        syncSuccess:
+          "Successfully synced {{count}} orders from external platforms.",
         orderUpdated: "Order #{{id}} updated to {{status}}",
         orderRecorded: "{{platform}} order recorded.",
         takeOrder: "Take Order",
@@ -135,7 +134,7 @@ const resources = {
         orderForTable: "Order for Table {{number}}",
         confirmOrder: "Confirm Order",
         orderPlaced: "Order placed successfully",
-        backToPos: "Back to POS"
+        backToPos: "Back to POS",
       },
       inventory: {
         title: "Inventory",
@@ -145,20 +144,20 @@ const resources = {
         stats: {
           totalItems: "Total Items",
           lowStock: "Low Stock Alert",
-          outOfStock: "Out of Stock"
+          outOfStock: "Out of Stock",
         },
         table: {
           name: "Item Name",
           category: "Category",
           stock: "Current Stock",
           minLevel: "Min. Level",
-          status: "Status"
+          status: "Status",
         },
         units: "{{count}} units",
         status: {
           outOfStock: "Out of Stock",
           lowStock: "Low Stock",
-          healthy: "Healthy"
+          healthy: "Healthy",
         },
         restockPrompt: "Enter restock amount:",
         restockSuccess: "Inventory updated",
@@ -171,8 +170,8 @@ const resources = {
           price: "Price (RM)",
           category: "Category",
           stock: "Initial Stock",
-          minStock: "Min. Stock Alert"
-        }
+          minStock: "Min. Stock Alert",
+        },
       },
       expenses: {
         title: "Expenses & Cash",
@@ -187,9 +186,9 @@ const resources = {
           salary: "Salary",
           inventory: "Inventory Purchase",
           utility: "Utility Bill",
-          other: "Other"
+          other: "Other",
         },
-        amount: "Amount ($)",
+        amount: "Amount (RM)",
         description: "Description",
         descPlaceholder: "e.g., Weekly vegetable restock",
         date: "Date",
@@ -200,7 +199,7 @@ const resources = {
         stats: {
           total: "Total Expenses (Month)",
           inventory: "Inventory Spend",
-          salary: "Salary Payouts"
+          salary: "Salary Payouts",
         },
         table: {
           date: "Date",
@@ -208,11 +207,11 @@ const resources = {
           description: "Description",
           amount: "Amount",
           recordedBy: "Recorded By",
-          receipt: "Receipt"
+          receipt: "Receipt",
         },
         noExpenses: "No expenses recorded yet.",
         fillRequired: "Please fill in all required fields.",
-        saveSuccess: "Expense recorded successfully."
+        saveSuccess: "Expense recorded successfully.",
       },
       customers: {
         title: "Customer Directory",
@@ -224,17 +223,17 @@ const resources = {
           status: "Status",
           totalOrders: "Total Orders",
           joined: "Joined",
-          history: "History"
+          history: "History",
         },
         noCustomers: "No customers found.",
         status: {
           registered: "Registered",
-          guest: "Guest"
+          guest: "Guest",
         },
         viewOrders: "View Orders",
         historyTitle: "Order History: {{name}}",
         noOrders: "No orders found for this customer.",
-        orderNum: "Order #{{id}}"
+        orderNum: "Order #{{id}}",
       },
       reports: {
         title: "Financial Reports",
@@ -244,7 +243,7 @@ const resources = {
           revenue: "Total Revenue",
           expenses: "Total Expenses",
           profit: "Net Profit",
-          orders: "Total Orders"
+          orders: "Total Orders",
         },
         vsLastMonth: "vs last month",
         revenueByPlatform: "Revenue by Platform",
@@ -254,8 +253,8 @@ const resources = {
           instore: "In-Store",
           pwa: "PWA",
           foodpanda: "FoodPanda",
-          shopeefood: "ShopeeFood"
-        }
+          shopeefood: "ShopeeFood",
+        },
       },
       qr: {
         title: "QR Codes",
@@ -263,7 +262,7 @@ const resources = {
         tablePlaceholder: "Table #",
         addTable: "Add Table",
         save: "Save",
-        print: "Print"
+        print: "Print",
       },
       staff: {
         title: "Staff Management",
@@ -282,12 +281,16 @@ const resources = {
         deleteSuccess: "Staff deleted.",
         confirmDelete: "Delete staff member",
         confirmDeleteTitle: "Are you sure?",
-        confirmDeleteDesc: "This will remove \"{{name}}\" from active staff. This cannot be undone.",
+        confirmDeleteDesc:
+          'This will remove "{{name}}" from active staff. This cannot be undone.',
         confirmDeleteYes: "Yes, delete staff",
+        restoreSuccess: "Staff restored.",
+        restore: "Restore",
         noStaff: "No staff found.",
         activeStaff: "Active Staff",
         pastStaff: "Past Staff",
         noPastStaff: "No past staff records.",
+        permissions: "Permissions",
         save: "Save Changes",
         cancel: "Cancel",
         table: {
@@ -295,10 +298,11 @@ const resources = {
           name: "Name",
           phone: "Phone",
           role: "Role",
-          joined: "Joined"
-        }
-      }
-    }
+          joined: "Joined",
+          deletedAt: "Deleted At",
+        },
+      },
+    },
   },
   ms: {
     translation: {
@@ -307,7 +311,7 @@ const resources = {
       categories: {
         all: "Semua",
         food: "Makanan",
-        drink: "Minuman"
+        drink: "Minuman",
       },
       cart: {
         viewOrder: "Lihat Pesanan",
@@ -315,7 +319,7 @@ const resources = {
         total: "Jumlah",
         placeOrder: "Buat Pesanan",
         summary: "Ringkasan Pesanan",
-        add: "Tambah"
+        add: "Tambah",
       },
       customerInfo: {
         title: "Maklumat Pelanggan",
@@ -323,13 +327,13 @@ const resources = {
         name: "Nama Penuh",
         email: "Alamat Emel",
         phone: "Nombor Telefon",
-        error: "Sila isi butiran anda untuk komunikasi masa depan."
+        error: "Sila isi butiran anda untuk komunikasi masa depan.",
       },
       success: {
         title: "Pesanan Diterima!",
         desc: "Pesanan anda sedang disediakan. Anda boleh lihat resit di bawah.",
         back: "Kembali ke Menu",
-        toast: "Pesanan berjaya dibuat!"
+        toast: "Pesanan berjaya dibuat!",
       },
       receipt: {
         title: "Resit",
@@ -341,7 +345,7 @@ const resources = {
         subtotal: "Jumlah Kecil",
         discount: "Diskaun",
         total: "Jumlah",
-        pending: "Menunggu"
+        pending: "Menunggu",
       },
       nav: {
         dashboard: "Papan Pemuka",
@@ -352,10 +356,11 @@ const resources = {
         reports: "Laporan",
         employees: "Pekerja",
         staff: "Kakitangan",
+        roles: "Peranan & Kebenaran",
         selfOrderQrTable: "Pesanan Sendiri (QR Meja)",
         logout: "Log Keluar",
         loginSoon: "Ciri log masuk akan datang tidak lama lagi!",
-        table: "Meja {{number}}"
+        table: "Meja {{number}}",
       },
       login: {
         title: "Rasidi Tomyam",
@@ -368,11 +373,8 @@ const resources = {
         roles: {
           boss: "Boss",
           super_admin: "Super Admin",
-          manager: "Pengurus",
-          supervisor: "Penyelia",
-          cashier: "Juruwang",
-          server: "Pelayan"
-        }
+          staff: "Staff",
+        },
       },
       dashboard: {
         welcome: "Selamat Kembali, Mak",
@@ -381,7 +383,7 @@ const resources = {
           todaySales: "Jualan Hari Ini",
           activeOrders: "Pesanan Aktif",
           lowStock: "Item Stok Rendah",
-          totalCustomers: "Jumlah Pelanggan"
+          totalCustomers: "Jumlah Pelanggan",
         },
         recentOrders: "Pesanan Terkini",
         inventoryAlerts: "Amaran Inventori",
@@ -391,7 +393,7 @@ const resources = {
         allHealthy: "Semua tahap stok adalah sihat.",
         onlyLeft: "Hanya tinggal {{count}}",
         restock: "Tambah Stok",
-        table: "Meja {{number}}"
+        table: "Meja {{number}}",
       },
       pos: {
         title: "Pesanan & POS",
@@ -423,7 +425,8 @@ const resources = {
         summary: "Ringkasan Langsung",
         revenue: "Hasil Hari Ini",
         completedOrders: "Daripada {{count}} pesanan selesai",
-        syncSuccess: "Berjaya menyegerak {{count}} pesanan daripada platform luaran.",
+        syncSuccess:
+          "Berjaya menyegerak {{count}} pesanan daripada platform luaran.",
         orderUpdated: "Pesanan #{{id}} dikemas kini kepada {{status}}",
         orderRecorded: "Pesanan {{platform}} direkodkan.",
         takeOrder: "Ambil Pesanan",
@@ -432,7 +435,7 @@ const resources = {
         orderForTable: "Pesanan untuk Meja {{number}}",
         confirmOrder: "Sahkan Pesanan",
         orderPlaced: "Pesanan berjaya dibuat",
-        backToPos: "Kembali ke POS"
+        backToPos: "Kembali ke POS",
       },
       inventory: {
         title: "Inventori",
@@ -442,20 +445,20 @@ const resources = {
         stats: {
           totalItems: "Jumlah Item",
           lowStock: "Amaran Stok Rendah",
-          outOfStock: "Kehabisan Stok"
+          outOfStock: "Kehabisan Stok",
         },
         table: {
           name: "Nama Item",
           category: "Kategori",
           stock: "Stok Semasa",
           minLevel: "Tahap Min.",
-          status: "Status"
+          status: "Status",
         },
         units: "{{count}} unit",
         status: {
           outOfStock: "Kehabisan Stok",
           lowStock: "Stok Rendah",
-          healthy: "Sihat"
+          healthy: "Sihat",
         },
         restockPrompt: "Masukkan jumlah tambah stok:",
         restockSuccess: "Inventori dikemas kini",
@@ -468,8 +471,8 @@ const resources = {
           price: "Harga (RM)",
           category: "Kategori",
           stock: "Stok Awal",
-          minStock: "Had Stok Minimum"
-        }
+          minStock: "Had Stok Minimum",
+        },
       },
       expenses: {
         title: "Perbelanjaan & Tunai",
@@ -484,9 +487,9 @@ const resources = {
           salary: "Gaji",
           inventory: "Pembelian Inventori",
           utility: "Bil Utiliti",
-          other: "Lain-lain"
+          other: "Lain-lain",
         },
-        amount: "Amaun ($)",
+        amount: "Amaun (RM)",
         description: "Penerangan",
         descPlaceholder: "cth., Tambah stok sayur mingguan",
         date: "Tarikh",
@@ -497,7 +500,7 @@ const resources = {
         stats: {
           total: "Jumlah Perbelanjaan (Bulan)",
           inventory: "Perbelanjaan Inventori",
-          salary: "Pembayaran Gaji"
+          salary: "Pembayaran Gaji",
         },
         table: {
           date: "Tarikh",
@@ -505,11 +508,11 @@ const resources = {
           description: "Penerangan",
           amount: "Amaun",
           recordedBy: "Direkod Oleh",
-          receipt: "Resit"
+          receipt: "Resit",
         },
         noExpenses: "Tiada perbelanjaan direkodkan lagi.",
         fillRequired: "Sila isi semua medan yang diperlukan.",
-        saveSuccess: "Perbelanjaan berjaya direkodkan."
+        saveSuccess: "Perbelanjaan berjaya direkodkan.",
       },
       customers: {
         title: "Direktori Pelanggan",
@@ -521,17 +524,17 @@ const resources = {
           status: "Status",
           totalOrders: "Jumlah Pesanan",
           joined: "Sertai",
-          history: "Sejarah"
+          history: "Sejarah",
         },
         noCustomers: "Tiada pelanggan ditemui.",
         status: {
           registered: "Berdaftar",
-          guest: "Tetamu"
+          guest: "Tetamu",
         },
         viewOrders: "Lihat Pesanan",
         historyTitle: "Sejarah Pesanan: {{name}}",
         noOrders: "Tiada pesanan ditemui untuk pelanggan ini.",
-        orderNum: "Pesanan #{{id}}"
+        orderNum: "Pesanan #{{id}}",
       },
       reports: {
         title: "Laporan Kewangan",
@@ -541,7 +544,7 @@ const resources = {
           revenue: "Jumlah Hasil",
           expenses: "Jumlah Perbelanjaan",
           profit: "Untung Bersih",
-          orders: "Jumlah Pesanan"
+          orders: "Jumlah Pesanan",
         },
         vsLastMonth: "berbanding bulan lepas",
         revenueByPlatform: "Hasil mengikut Platform",
@@ -551,8 +554,8 @@ const resources = {
           instore: "Dalam Kedai",
           pwa: "PWA",
           foodpanda: "FoodPanda",
-          shopeefood: "ShopeeFood"
-        }
+          shopeefood: "ShopeeFood",
+        },
       },
       qr: {
         title: "Kod QR",
@@ -560,7 +563,7 @@ const resources = {
         tablePlaceholder: "Meja #",
         addTable: "Tambah Meja",
         save: "Simpan",
-        print: "Cetak"
+        print: "Cetak",
       },
       staff: {
         title: "Pengurusan Kakitangan",
@@ -579,12 +582,16 @@ const resources = {
         deleteSuccess: "Kakitangan dipadam.",
         confirmDelete: "Padam ahli kakitangan",
         confirmDeleteTitle: "Adakah anda pasti?",
-        confirmDeleteDesc: "Ini akan memadam \"{{name}}\" daripada kakitangan aktif. Tindakan ini tidak boleh dibatalkan.",
+        confirmDeleteDesc:
+          'Ini akan memadam "{{name}}" daripada kakitangan aktif. Tindakan ini tidak boleh dibatalkan.',
         confirmDeleteYes: "Ya, padam kakitangan",
+        restoreSuccess: "Kakitangan dipulihkan.",
+        restore: "Pulihkan",
         noStaff: "Tiada kakitangan ditemui.",
         activeStaff: "Kakitangan Aktif",
         pastStaff: "Bekas Kakitangan",
         noPastStaff: "Tiada rekod kakitangan lama.",
+        permissions: "Kebenaran",
         save: "Simpan Perubahan",
         cancel: "Batal",
         table: {
@@ -592,10 +599,11 @@ const resources = {
           name: "Nama",
           phone: "Telefon",
           role: "Peranan",
-          joined: "Tarikh Sertai"
-        }
-      }
-    }
+          joined: "Tarikh Sertai",
+          deletedAt: "Tarikh Dipadam",
+        },
+      },
+    },
   },
   th: {
     translation: {
@@ -604,7 +612,7 @@ const resources = {
       categories: {
         all: "ทั้งหมด",
         food: "อาหาร",
-        drink: "เครื่องดื่ม"
+        drink: "เครื่องดื่ม",
       },
       cart: {
         viewOrder: "ดูรายการสั่งซื้อ",
@@ -612,7 +620,7 @@ const resources = {
         total: "รวม",
         placeOrder: "สั่งอาหาร",
         summary: "สรุปรายการสั่งซื้อ",
-        add: "เพิ่ม"
+        add: "เพิ่ม",
       },
       customerInfo: {
         title: "ข้อมูลลูกค้า",
@@ -620,13 +628,13 @@ const resources = {
         name: "ชื่อ-นามสกุล",
         email: "อีเมล",
         phone: "เบอร์โทรศัพท์",
-        error: "กรุณากรอกข้อมูลของคุณเพื่อการติดต่อในอนาคต"
+        error: "กรุณากรอกข้อมูลของคุณเพื่อการติดต่อในอนาคต",
       },
       success: {
         title: "รับออเดอร์แล้ว!",
         desc: "กำลังเตรียมอาหารของคุณ คุณสามารถดูใบเสร็จได้ที่ด้านล่าง",
         back: "กลับไปที่เมนู",
-        toast: "สั่งอาหารสำเร็จแล้ว!"
+        toast: "สั่งอาหารสำเร็จแล้ว!",
       },
       receipt: {
         title: "ใบเสร็จ",
@@ -638,7 +646,7 @@ const resources = {
         subtotal: "ยอดรวมย่อย",
         discount: "ส่วนลด",
         total: "ยอดรวมทั้งหมด",
-        pending: "รอดำเนินการ"
+        pending: "รอดำเนินการ",
       },
       nav: {
         dashboard: "แดชบอร์ด",
@@ -649,10 +657,11 @@ const resources = {
         reports: "รายงาน",
         employees: "พนักงาน",
         staff: "พนักงาน",
+        roles: "บทบาท & สิทธิ์",
         selfOrderQrTable: "สั่งอาหารด้วยคิวอาร์โค้ด",
         logout: "ออกจากระบบ",
         loginSoon: "ฟีเจอร์เข้าสู่ระบบกำลังจะมาเร็วๆ นี้!",
-        table: "โต๊ะ {{number}}"
+        table: "โต๊ะ {{number}}",
       },
       login: {
         title: "Rasidi Tomyam",
@@ -663,13 +672,10 @@ const resources = {
         password: "รหัสผ่าน",
         signIn: "เข้าสู่ระบบ",
         roles: {
-          boss: "Boss",
+          boss: "เจ้าของ",
           super_admin: "ผู้ดูแลระบบสูงสุด (คุณแม่)",
-          manager: "ผู้จัดการ",
-          supervisor: "ซูเปอร์ไวเซอร์",
-          cashier: "พนักงานแคชเชียร์",
-          server: "พนักงานเสิร์ฟ"
-        }
+          staff: "พนักงาน",
+        },
       },
       dashboard: {
         welcome: "ยินดีต้อนรับกลับ คุณแม่",
@@ -678,7 +684,7 @@ const resources = {
           todaySales: "ยอดขายวันนี้",
           activeOrders: "ออเดอร์ที่กำลังดำเนินการ",
           lowStock: "สินค้าสต็อกต่ำ",
-          totalCustomers: "ลูกค้าทั้งหมด"
+          totalCustomers: "ลูกค้าทั้งหมด",
         },
         recentOrders: "ออเดอร์ล่าสุด",
         inventoryAlerts: "การแจ้งเตือนคลังสินค้า",
@@ -688,7 +694,7 @@ const resources = {
         allHealthy: "ระดับสต็อกทั้งหมดปกติ",
         onlyLeft: "เหลือเพียง {{count}} ชิ้น",
         restock: "เติมสต็อก",
-        table: "โต๊ะ {{number}}"
+        table: "โต๊ะ {{number}}",
       },
       pos: {
         title: "ออเดอร์ & POS",
@@ -729,7 +735,7 @@ const resources = {
         orderForTable: "ออเดอร์สำหรับโต๊ะ {{number}}",
         confirmOrder: "ยืนยันออเดอร์",
         orderPlaced: "สั่งซื้อสำเร็จแล้ว",
-        backToPos: "กลับไปที่ POS"
+        backToPos: "กลับไปที่ POS",
       },
       inventory: {
         title: "คลังสินค้า",
@@ -739,20 +745,20 @@ const resources = {
         stats: {
           totalItems: "สินค้าทั้งหมด",
           lowStock: "แจ้งเตือนสต็อกต่ำ",
-          outOfStock: "สินค้าหมด"
+          outOfStock: "สินค้าหมด",
         },
         table: {
           name: "ชื่อสินค้า",
           category: "หมวดหมู่",
           stock: "สต็อกปัจจุบัน",
           minLevel: "ระดับขั้นต่ำ",
-          status: "สถานะ"
+          status: "สถานะ",
         },
         units: "{{count}} ชิ้น",
         status: {
           outOfStock: "สินค้าหมด",
           lowStock: "สต็อกต่ำ",
-          healthy: "ปกติ"
+          healthy: "ปกติ",
         },
         restockPrompt: "ป้อนจำนวนการเติมสต็อก:",
         restockSuccess: "อัปเดตคลังสินค้าแล้ว",
@@ -765,8 +771,8 @@ const resources = {
           price: "ราคา (RM)",
           category: "หมวดหมู่",
           stock: "สต็อกเริ่มต้น",
-          minStock: "สต็อกขั้นต่ำ"
-        }
+          minStock: "สต็อกขั้นต่ำ",
+        },
       },
       expenses: {
         title: "ค่าใช้จ่าย & เงินสด",
@@ -781,9 +787,9 @@ const resources = {
           salary: "เงินเดือน",
           inventory: "ซื้อสินค้าเข้าคลัง",
           utility: "ค่าน้ำค่าไฟ",
-          other: "อื่นๆ"
+          other: "อื่นๆ",
         },
-        amount: "จำนวนเงิน ($)",
+        amount: "จำนวนเงิน (RM)",
         description: "คำอธิบาย",
         descPlaceholder: "เช่น เติมสต็อกผักประจำสัปดาห์",
         date: "วันที่",
@@ -794,7 +800,7 @@ const resources = {
         stats: {
           total: "ค่าใช้จ่ายทั้งหมด (เดือน)",
           inventory: "การใช้จ่ายคลังสินค้า",
-          salary: "การจ่ายเงินเดือน"
+          salary: "การจ่ายเงินเดือน",
         },
         table: {
           date: "วันที่",
@@ -802,11 +808,11 @@ const resources = {
           description: "คำอธิบาย",
           amount: "จำนวนเงิน",
           recordedBy: "บันทึกโดย",
-          receipt: "ใบเสร็จ"
+          receipt: "ใบเสร็จ",
         },
         noExpenses: "ยังไม่มีการบันทึกค่าใช้จ่าย",
         fillRequired: "กรุณากรอกข้อมูลที่จำเป็นทั้งหมด",
-        saveSuccess: "บันทึกค่าใช้จ่ายสำเร็จ"
+        saveSuccess: "บันทึกค่าใช้จ่ายสำเร็จ",
       },
       customers: {
         title: "รายชื่อลูกค้า",
@@ -818,17 +824,17 @@ const resources = {
           status: "สถานะ",
           totalOrders: "ออเดอร์ทั้งหมด",
           joined: "เข้าร่วมเมื่อ",
-          history: "ประวัติ"
+          history: "ประวัติ",
         },
         noCustomers: "ไม่พบลูกค้า",
         status: {
           registered: "ลงทะเบียนแล้ว",
-          guest: "ลูกค้าทั่วไป"
+          guest: "ลูกค้าทั่วไป",
         },
         viewOrders: "ดูออเดอร์",
         historyTitle: "ประวัติออเดอร์: {{name}}",
         noOrders: "ไม่พบออเดอร์สำหรับลูกค้ารายนี้",
-        orderNum: "ออเดอร์ #{{id}}"
+        orderNum: "ออเดอร์ #{{id}}",
       },
       reports: {
         title: "รายงานทางการเงิน",
@@ -838,7 +844,7 @@ const resources = {
           revenue: "รายได้ทั้งหมด",
           expenses: "ค่าใช้จ่ายทั้งหมด",
           profit: "กำไรสุทธิ",
-          orders: "ออเดอร์ทั้งหมด"
+          orders: "ออเดอร์ทั้งหมด",
         },
         vsLastMonth: "เทียบกับเดือนที่แล้ว",
         revenueByPlatform: "รายได้ตามแพลตฟอร์ม",
@@ -848,8 +854,8 @@ const resources = {
           instore: "หน้าร้าน",
           pwa: "PWA",
           foodpanda: "FoodPanda",
-          shopeefood: "ShopeeFood"
-        }
+          shopeefood: "ShopeeFood",
+        },
       },
       qr: {
         title: "รหัส QR",
@@ -857,7 +863,7 @@ const resources = {
         tablePlaceholder: "โต๊ะ #",
         addTable: "เพิ่มโต๊ะ",
         save: "บันทึก",
-        print: "พิมพ์"
+        print: "พิมพ์",
       },
       staff: {
         title: "จัดการพนักงาน",
@@ -876,12 +882,16 @@ const resources = {
         deleteSuccess: "ลบพนักงานแล้ว",
         confirmDelete: "ลบพนักงาน",
         confirmDeleteTitle: "คุณแน่ใจหรือไม่?",
-        confirmDeleteDesc: "การดำเนินการนี้จะลบ \"{{name}}\" ออกจากพนักงานที่ใช้งานอยู่ และไม่สามารถยกเลิกได้",
+        confirmDeleteDesc:
+          'การดำเนินการนี้จะลบ "{{name}}" ออกจากพนักงานที่ใช้งานอยู่ และไม่สามารถยกเลิกได้',
         confirmDeleteYes: "ใช่ ลบพนักงาน",
+        restoreSuccess: "คืนสถานะพนักงานแล้ว",
+        restore: "คืนสถานะ",
         noStaff: "ไม่พบพนักงาน",
         activeStaff: "พนักงานปัจจุบัน",
         pastStaff: "พนักงานเก่า",
         noPastStaff: "ไม่มีข้อมูลพนักงานเก่า",
+        permissions: "สิทธิ์",
         save: "บันทึกการเปลี่ยนแปลง",
         cancel: "ยกเลิก",
         table: {
@@ -889,11 +899,12 @@ const resources = {
           name: "ชื่อ",
           phone: "เบอร์โทรศัพท์",
           role: "ตำแหน่ง",
-          joined: "วันที่เข้าร่วม"
-        }
-      }
-    }
-  }
+          joined: "วันที่เข้าร่วม",
+          deletedAt: "วันที่ลบ",
+        },
+      },
+    },
+  },
 };
 
 i18n
@@ -901,10 +912,10 @@ i18n
   .use(initReactI18next)
   .init({
     resources,
-    fallbackLng: 'en',
+    fallbackLng: "en",
     interpolation: {
-      escapeValue: false
-    }
+      escapeValue: false,
+    },
   });
 
 export default i18n;

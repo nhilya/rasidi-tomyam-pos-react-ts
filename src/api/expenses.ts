@@ -20,9 +20,9 @@ export async function getExpenses(params?: ExpensesParams): Promise<PaginatedRes
   return apiFetch(`/expenses${qs}`);
 }
 
-export async function createExpense(payload: CreateExpensePayload): Promise<ApiExpense> {
+export async function createExpense(payload: CreateExpensePayload | FormData): Promise<ApiExpense> {
   return apiFetch('/expenses', {
     method: 'POST',
-    body: JSON.stringify(payload),
+    body: payload instanceof FormData ? payload : JSON.stringify(payload),
   });
 }
